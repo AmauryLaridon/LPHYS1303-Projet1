@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+###Fonctions initiales###
 def Create_Init(x,x1,x2,yy):
     y=np.zeros(np.size(x))
     for i in range(np.size(x)):
@@ -17,9 +17,18 @@ def f(y,a,b):
             h[p]=0.5*(1.-np.cos(2.*np.pi*((y[p]-(b+a)/2)/l)))
             h[p]=(1+np.cos(2.*np.pi*((y[p]-(b+a)/2)/(l/2))))*0.5
     return(h)
+def f_cos(y,a,b):
+    """fonction initiale de cos"""
+    k=y.size
+    l=b-a
+    h=np.zeros(k)
+    for p in range(k):
+        h[p] = np.cos(np.pi*y[p])
+    return(h)
 
-
+###Méthods de différences finies###
 def Leapfrog_adv(U0,a,x,tmax,lmb):
+    """Schéma Leapfrog pour l'advection classique"""
     h=np.abs(x[1]-x[0])
     k=lmb*h/(abs(a))
     M=int(np.round(tmax/k))+1
@@ -56,6 +65,9 @@ def integration_adv(U0,a,x,tmax,lmb,int_mode):
             U[1:-1,i+1]=(1-lmb)*U[1:-1,i]+lmb*U[0:-2,i]
             U[0,i+1]=0
             U[-1,i+1]=0
+    if int_mode=='UpwindKDV':
+        for i in range(M-1):
+            
     elif int_mode=='Downwind':
         for i in range(M-1):
             U[1:-1,i+1]=(1+lmb)*U[1:-1,i]-lmb*U[2:,i]
@@ -69,6 +81,16 @@ def integration_adv(U0,a,x,tmax,lmb,int_mode):
             U[1:-1,i+1]=A*U[2:,i]+B*U[1:-1,i]+C*U[0:-2,i]
             U[0,i+1]=0
             U[-1,i+1]=0
+    if int_mode=='LeapFrog':
+        for i in range(M-1):
+            if i==0:
+                U[1:-1,i+1]=(1-lmb)*U[1:-1,i]+lmb*U[0:-2,i]
+                U[0,i+1]=0
+                U[-1,i+1]=0
+            else:
+                U[1:-1,i+1]=U[1:-1,i-1]-lmb*(U[2:,i]-U[0:-2,i])
+                U[0,i+1]=0
+                U[-1,i+1]=0
     else:
         print('Unknown integration scheme')
         U=0
@@ -77,7 +99,7 @@ def integration_adv(U0,a,x,tmax,lmb,int_mode):
 a=1
 
 lmb=1.
-L=150
+L=10
 N=1001
 x=np.linspace(0.,L,N+2)
 tmax=100
@@ -86,8 +108,11 @@ U0_carre=Create_Init(x,4,5,1)
 a_cos=0
 b_cos=20
 U0_cos=f(x,a_cos,b_cos)
+#U_cos = f_cos(x,0, 2)
 
-U_up_carre=integration_adv(U0_carre,a,x,tmax,lmb,'Upwind')
+
+
+"""U_up_carre=integration_adv(U0_carre,a,x,tmax,lmb,'Upwind')
 U_down_carre=integration_adv(U0_carre,a,x,tmax,lmb,'Downwind')
 U_lw_carre=integration_adv(U0_carre,a,x,tmax,lmb,'Lax-Wendroff')
 U_lp_carre=Leapfrog_adv(U0_carre,a,x,tmax,lmb)
@@ -157,7 +182,7 @@ for i in range(len(Mspan)):
     ax[1,i].legend(loc='best',fontsize='small')
 plt.show()
 
-"""Analyse stabilité des schémas"""
+###Analyse stabilité des schémas###
 #Upwind
 ko=np.linspace(0.01,np.pi-0.001,100)
 
@@ -250,3 +275,4 @@ ax[1].set_thetagrids(angles=[0,180],labels=['rh=0','rh=$\pi$'],fontsize=15)
 ax[1].legend()
 ax[1].set_title(r'$\frac{\theta_{d}}{\theta_{a}}$')
 plt.show()
+"""
