@@ -32,12 +32,12 @@ def time_ev(u_0, t_f, k, x_f, h):
             u2 = U[-2]
             
         U.append([0,0] + [u2[i] - (k/(3*h)) *(u1[i+1] + u1[i] + u1[i-1]) * (u1[i+1] - u1[i-1]) + (delta**2) * (k/(h**3)) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2])  for i in range(2,len(u1)-2)] + [0,0])
-    plt.plot(x_range, U[0], label = "t=0")
-    plt.plot(x_range, U[200], label = "t=0.1")
-    plt.plot(x_range, U[2000], label = "t=1")
+    """plt.plot(x_range, U[0], label = "t=0")
+    plt.plot(x_range, U[100], label = "t=0.1")
+    plt.plot(x_range, U[1000], label = "t=1")
     plt.legend()
     plt.show()
-    plt.clf()
+    plt.clf()"""
     
     [xx,tt]=np.meshgrid(x_range,t_range)
     plt.contourf(xx,tt, np.array(U), levels = 10)
@@ -47,15 +47,17 @@ def time_ev(u_0, t_f, k, x_f, h):
     plt.show()
     
     
-def soliton1(x):
-    return (pi/0.2)*hypsecant.pdf((x-1)/0.2)
+def soliton1(x,c,a):
+    return 0.5*c*(pi*hypsecant.pdf((x-a)*sqrt(c)/2))**2
 
-def soliton2(x):
-    return (pi/0.4)*hypsecant.pdf((x-3)/0.4)
+def soliton2(x,c,a):
+    return 0.5*c*(pi*hypsecant.pdf((x-a)*sqrt(c)/2))**2
 
-def solit(x):
-    return soliton1(x) + soliton2(x)
+def solit(c1,a1,c2,a2):
+    def sol_(x):
+        return soliton1(x,c1,a1) + soliton2(x,c2,a2)
+    return sol_
     
     
 if __name__ == "__main__":
-    time_ev(solit, 4, 0.0005, 10, 0.05)
+    time_ev(solit(20,15,40,5), 6, 0.001, 40, 0.5)
