@@ -1,252 +1,265 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import cm
+
+###################################Exercice 1 Schéma Upwind###############################
+
+def f_cos(x_grid):
+    #fonction initiale de cos
+    N = x_grid.size
+    U0 = np.zeros(N)
+    for i in range(N):
+        U0[i] = np.cos(np.pi*x_grid[i])
+    return(U0)
 
 
-def Create_Init(x,x1,x2,yy):
-    y=np.zeros(np.size(x))
-    for i in range(np.size(x)):
-        if x[i]>x1 and x[i]<x2:
-            y[i]=yy
-    return(y)
-def f(y,a,b):
-    k=y.size
-    l=b-a
-    h=np.zeros(k)
-    for p in range(k):
-        if y[p]>=(b+a)/2-(b-a)/4 and y[p]<=(b+a)/2+(b-a)/4:
-            h[p]=0.5*(1.-np.cos(2.*np.pi*((y[p]-(b+a)/2)/l)))
-            h[p]=(1+np.cos(2.*np.pi*((y[p]-(b+a)/2)/(l/2))))*0.5
-    return(h)
+x_L = 0.0
+x_R = 2.0
+L = x_R - x_L
+h = 0.01
+N = L/h
+N = int(N)
+x_grid = np.linspace(x_L, x_R - h, N)
+print("Résolution numérique avec une grille spatiale de {} points".format(N))
+t_0 = 0
+T = 1.3
+k = 0.00001
+M = T/k
+M = int(M)
+t_grid = np.linspace(t_0, T-k, M)
+print("Résolution numérique avec une grille temporelle de {} points".format(M))
+delta = 0.022
+print("Paramètres numérique : L = {}, T = {}s, h = {}, k = {}, delta = {}".format(L, T, h, k, delta))
 
 
-def Leapfrog_adv(U0,a,x,tmax,lmb):
-    h=np.abs(x[1]-x[0])
-    k=lmb*h/(abs(a))
-    M=int(np.round(tmax/k))+1
-    t=np.linspace(0.,tmax,M)
-    k=t[1]-t[0]
-    lmb=np.abs(a)*k/h
-    U=np.zeros((np.shape(x)[0],np.shape(t)[0]))
-    U[:,0]=U0
-    for i in range(M-1):
-        if i==0:
-            U[1:-1,i+1]=(1-lmb)*U[1:-1,i]+lmb*U[0:-2,i]
-            U[0,i+1]=0
-            U[-1,i+1]=0
-        else:
-            U[1:-1,i+1]=U[1:-1,i-1]-lmb*(U[2:,i]-U[0:-2,i])
-            U[0,i+1]=0
-            U[-1,i+1]=0
-    return(U,x,t)
+def Upwind_KdV(U0, x_grid, t_grid, T, delta):
+    #Schéma Upwind pour l équation de KdV
+    h = np.abs(x_grid[1]-x_grid[0])
+    k = np.abs(t_grid[1]-x_grid[0])
+    U = np.zeros((np.shape(x_grid)[0], np.shape(t_grid)[0]), dtype=np.float64)
+    M = np.shape(t_grid)[0]
+    U[:, 0] = U0
+    for j in range(M-1):
+        # Implémentation schéma
+        U[2:-2, j+1] = U[2:-2, j]-(k/h)*(U[2:-2, j]-U[1:-3, j])*U[2:-2, j]-((delta**2)*k/(2*(h)**3))*(U[4:, j]-2*U[3:-1, j]
+        +2*U[1:-3, j]-U[0:-4, j])
+        # Conditions aux bords
+        U[0, j+1] = 0
+        U[1, j+1] = 0
+        U[-2, j+1] = 0
+        U[-1, j+1] = 0
+        #U[0,:] = U[-1,:]
+        #U[1,:] = U[-2,:]    #Tentative d'implémenter des conditions aux bords périodiques cfr plus bas mais ça ne change rien
+    return U
 
+#Initialisiation
+U0 = f_cos(x_grid)
+Upwind = Upwind_KdV(U0, x_grid, t_grid, T, delta)
+print(np.shape(Upwind))
+print(Upwind)
 
-
-def integration_adv(U0,a,x,tmax,lmb,int_mode):
-    h=np.abs(x[1]-x[0])
-    k=lmb*h/(abs(a))
-    M=int(np.round(tmax/k))+1
-    t=np.linspace(0.,tmax,M)
-    k=t[1]-t[0]
-    lmb=np.abs(a)*k/h
-    U=np.zeros((np.shape(x)[0],np.shape(t)[0]))
-    U[:,0]=U0
-    #Upwind
-    if int_mode=='Upwind':
-        for i in range(M-1):
-            U[1:-1,i+1]=(1-lmb)*U[1:-1,i]+lmb*U[0:-2,i]
-            U[0,i+1]=0
-            U[-1,i+1]=0
-    elif int_mode=='Downwind':
-        for i in range(M-1):
-            U[1:-1,i+1]=(1+lmb)*U[1:-1,i]-lmb*U[2:,i]
-            U[0,i+1]=0
-            U[-1,i+1]=0
-    elif int_mode=='Lax-Wendroff':
-        A=-(1/2)*lmb*(1-lmb)
-        B=(1-lmb**2)
-        C=0.5*lmb*(1+lmb)
-        for i in range(M-1):
-            U[1:-1,i+1]=A*U[2:,i]+B*U[1:-1,i]+C*U[0:-2,i]
-            U[0,i+1]=0
-            U[-1,i+1]=0
-    else:
-        print('Unknown integration scheme')
-        U=0
-    return(U,x,t)
-
-a=1
-
-lmb=1.
-L=150
-N=1001
-x=np.linspace(0.,L,N+2)
-tmax=100
-
-U0_carre=Create_Init(x,4,5,1)
-a_cos=0
-b_cos=20
-U0_cos=f(x,a_cos,b_cos)
-
-U_up_carre=integration_adv(U0_carre,a,x,tmax,lmb,'Upwind')
-U_down_carre=integration_adv(U0_carre,a,x,tmax,lmb,'Downwind')
-U_lw_carre=integration_adv(U0_carre,a,x,tmax,lmb,'Lax-Wendroff')
-U_lp_carre=Leapfrog_adv(U0_carre,a,x,tmax,lmb)
-
-U_up_cos=integration_adv(U0_cos,a,x,tmax,lmb,'Upwind')
-U_down_cos=integration_adv(U0_cos,a,x,tmax,lmb,'Downwind')
-U_lw_cos=integration_adv(U0_cos,a,x,tmax,lmb,'Lax-Wendroff')
-U_lp_cos=Leapfrog_adv(U0_cos,a,x,tmax,lmb)
-
-t=U_up_carre[2]
-M=t.shape[0]
-Mspan=[0,0.25,0.5,0.75,0.99]
-
-fig,ax=plt.subplots(2,5,figsize=(15,7),sharey='row')
-for i in range(len(Mspan)):
-    n=int(np.floor(M*Mspan[i]))
-    center_carre=4.5+a*t[n]
-    center_cos=(b_cos+a_cos)/2+a*t[n]
-    ax[0,i].plot(x,U_up_carre[0][:,n],label='Upwind',linewidth=2.)
-    ax[0,i].plot(x,U_down_carre[0][:,n],label='Downwind',linewidth=2.)
-    ax[0,i].plot(x,U_lw_carre[0][:,n],label='Lax-Wendroff',linewidth=2.)
-    ax[0,i].plot(x,U_lp_carre[0][:,n],label='Leapfrog',linewidth=2.)
-    ax[0,i].plot(x,Create_Init(x-a*t[n],4,5,1),label='Analytique')
-    #ax[0,i].set_xlabel('x')
-    ax[0,i].set_ylabel('y')
-    ax[0,i].set_ylim((-0.5,1.5))
-    ax[0,i].set_xlim((center_carre-4,center_carre+4))
-    ax[0,i].set_title('Time=%.2f, lambda=%.3f'%(t[n],lmb))
-    ax[0,i].legend(loc='best',fontsize='small')
-    ax[1,i].plot(x,U_up_cos[0][:,n],label='Upwind',linewidth=2.)
-    ax[1,i].plot(x,U_down_cos[0][:,n],label='Downwind',linewidth=2.)
-    ax[1,i].plot(x,U_lw_cos[0][:,n],label='Lax-Wendroff',linewidth=2.)
-    ax[1,i].plot(x,U_lp_cos[0][:,n],label='Leapfrog',linewidth=2.)
-    ax[1,i].plot(x,f(x-a*t[n],a_cos,b_cos),label='Analytique')
-    ax[1,i].set_xlabel('x')
-    ax[1,i].set_ylabel('y')
-    ax[1,i].set_ylim((-0.5,1.5))
-    ax[1,i].set_xlim((center_cos-(b_cos-a_cos)/4-4,center_cos+(b_cos-a_cos)/4+4))
-    ax[1,i].set_title('Time=%.2f, lambda=%.3f'%(t[n],lmb))
-    ax[1,i].legend(loc='best',fontsize='small')
+#Plot d'instantanné avec la CI de cos()
+t_span = [0, 1/np.pi, 3.6/np.pi]
+n0 = 0
+plt.plot(x_grid, Upwind[:, n0], label="$t = {:2.2f}s$".format(t_grid[n0]), marker=',')
+n1 = int(np.floor(t_span[1]/k))
+t1 = 6000*k
+plt.plot(x_grid, Upwind[:, 6000], label="$t = {:2.2f} \;s$".format(t1), marker='+')
+#Je veux plot au même temps de référence que ceux de l'article mais je ne sais pas pourquoi je n'ai plus aucune valeur
+#pour des temps plus grand que 0.06s, je suspecte les 'nan' qui apparaissent trop vite dans le matrice U comme étant
+#l'origine du problème mais j'ai beau avoir relu toute mon implémentation je ne trouve pas l'erreur :/ En attendant j'ai plot_surface
+#pour t = 0.06s et là le résultat semble cohérent avec ce qu'ils ont dans l'article pour leur premier temps.
+#Update: dans l'article ils parlent de conditions aux bords périodiques or ici je suis pas sûr de les implémenter, peut-être le soucis
+#vient de là ? Si oui je ne comprend pas comment les rajouter ??
+n2 = int(np.floor(t_span[2]/k))
+plt.plot(x_grid, Upwind[:, n2], label="$t = 3.6/ \pi \; s$", marker='x')
+#plt.plot(uu[:, n], label="Theorical Solution $t = {:2.2f}s$".format(t[n]))
+plt.ylim([-1, 1.5])
+plt.xlabel("$x$")
+plt.ylabel("$u(x,t)$")
+plt.title('Instantannés de la résolution de KdV par le schéma Upwind, CI = cos ,$\delta = {}$'.format(delta))
+plt.legend()
+plt.show()
+plt.close()
+#Plot 2D
+[xx,tt]=np.meshgrid(x_grid,t_grid)
+a = plt.contourf(xx,tt, Upwind.T)
+plt.xlabel("x")
+plt.ylabel("t")
+#Si je vais tourner pour afficher ça, ça fait planter mon ordi ^^ en prenant T = 5s, pour T=1.5s ça plante plus
+#mais le graphe n'est pas bon.
+plt.colorbar(a)
 plt.show()
 
-print("Nombre de points d'espace ={}, nombre de points de temps = {}".format(N+2, t.shape[0]))
-fig,ax=plt.subplots(2,5,figsize=(15,7),sharey='row')
-for i in range(len(Mspan)):
-    n=int(np.floor(M*Mspan[i]))
-    center_carre=4.5+a*t[n]
-    center_cos=(b_cos+a_cos)/2+a*t[n]
-    ax[0,i].plot(x,U_up_carre[0][:,n],label='Upwind',linewidth=2.)
-    ax[0,i].plot(x,U_down_carre[0][:,n],label='Downwind',linewidth=2.)
-    ax[0,i].plot(x,U_lw_carre[0][:,n],label='Lax-Wendroff',linewidth=2.)
-    ax[0,i].plot(x,Create_Init(x-a*t[n],4,5,1),label='Analytique')
-    ax[0,i].set_ylabel('y')
-    ax[0,i].set_ylim((-0.5,1.5))
-    ax[0,i].set_xlim((center_carre-4,center_carre+4))
-    ax[0,i].set_title('Time=%.2f, lambda=%.1f'%(t[n],lmb))
-    ax[0,i].legend(loc='best',fontsize='small')
-    ax[1,i].plot(x,U_up_cos[0][:,n],label='Upwind',linewidth=2.)
-    ax[1,i].plot(x,U_down_cos[0][:,n],label='Downwind',linewidth=2.)
-    ax[1,i].plot(x,U_lw_cos[0][:,n],label='Lax-Wendroff',linewidth=2.)
-    ax[1,i].plot(x,f(x-a*t[n],a_cos,b_cos),label='Analytique')
-    ax[1,i].set_xlabel('x')
-    ax[1,i].set_ylabel('y')
-    ax[1,i].set_ylim((-0.5,1.5))
-    ax[1,i].set_xlim((center_cos-4,center_cos+4))
-    ax[1,i].set_title('Time=%.2f, lambda=%.1f'%(t[n],lmb))
-    ax[1,i].legend(loc='best',fontsize='small')
+######Condition initiale de sech^2#####
+
+def f_sech(x_grid):
+    #fonction initiale de sech^2
+    N = x_grid.size
+    U0 = np.zeros(N)
+    k = np.sqrt(2)
+    A = 2*(k**2)
+    for i in range(N):
+        U0[i] = A*(1/np.cosh(k*x_grid[i]))**2
+    return(U0)
+
+h = 0.1739
+k = 0.00001
+x_L = -20
+x_R = 20
+L = x_R - x_L
+N = L/h
+N = int(N)
+x_grid = np.linspace(x_L, x_R - h, N)
+print("Résolution numérique avec une grille spatiale de {} points".format(N))
+t_0 = 0
+T = 2
+M = T/k
+M = int(M)
+t_grid = np.linspace(t_0, T-k, M)
+print("Résolution numérique avec une grille temporelle de {} points".format(M))
+delta = 0.022
+print("Paramètres numérique : L = {}, T = {}s, h = {}, k = {}, delta = {}".format(L, T, h, k, delta))
+
+#Initialisiation
+U0 = f_sech(x_grid)
+Upwind = Upwind_KdV(U0, x_grid, t_grid, T, delta)
+print(np.shape(Upwind))
+print(Upwind)
+
+#Plot d'instantanné avec la CI de cos()
+t_span = [0, 1/np.pi, 3.6/np.pi]
+n0 = 0
+plt.plot(x_grid, Upwind[:, n0], label="$t = {:2.2f}s$".format(t_grid[n0]), marker=',')
+n1 = int(np.floor(t_span[1]/k))
+t1 = 6000*k
+plt.plot(x_grid, Upwind[:, 10], label="$t = {:2.2f} \;s$".format(t1), marker='+')
+n2 = int(np.floor(t_span[2]/k))
+plt.plot(x_grid, Upwind[:, n2], label="$t = 3.6/ \pi \; s$", marker='x')
+# plt.plot(uu[:, n], label="Theorical Solution $t = {:2.2f}s$".format(t[n]))
+#Même problème qu'au dessus le schéma est (dans l'état actuel de son implémentation) n'est pas du tout stable et je n'ai pas de
+#pour leurs temps de référence. Pour des instants 10**-4s après le début on voit déjà que ça part en couille.
+plt.ylim([-0.5, 2])
+plt.xlabel("$x$")
+plt.ylabel("$u(x,t)$")
+plt.title('Instantannés de la résolution de KdV par le schéma Upwind, CI = sech^2, $\delta = {}$'.format(delta))
+plt.legend()
 plt.show()
+plt.close()
 
-"""Analyse stabilité des schémas"""
-#Upwind
-ko=np.linspace(0.01,np.pi-0.001,100)
+#############################Exercice 2 Schéma ZK################################################
+######Condition initiale de cos#####
 
-lmb=[0.25,0.5,0.75,1.,1.0]
-fig,ax=plt.subplots(1,2,figsize=(15,5),subplot_kw=dict(polar=True))
-for i in range(5):
-    ampl_R=1-lmb[i]+lmb[i]*np.cos(ko)
-    ampl_I=-lmb[i]*np.sin(ko)
-    ampl=1-lmb[i]+lmb[i]*np.cos(ko)+(1j)*(-lmb[i]*np.sin(ko))
-    ratio=np.arctan(ampl_I/ampl_R)/(-lmb[i]*ko)
-    ratio=np.arctan2(np.imag(ampl),np.real(ampl))/(-lmb[i]*ko)
-    ax[0].plot(ko,np.sqrt(ampl_R**2+ampl_I**2),label='lambda=%.2f'%(lmb[i]))
-    ax[1].plot(ko,np.abs(ratio),label='lambda=%.2f'%(lmb[i]))
+#Paramètres numériques et physiques.
+h = 0.01
+k = 0.00001
+x_L = 0
+x_R = 2
+L = x_R - x_L
+N = L/h
+N = int(N)
+x_grid = np.linspace(x_L, x_R - h, N)
+print("Résolution numérique avec une grille spatiale de {} points".format(N))
+t_0 = 0
+T = 1.5
+M = T/k
+M = int(M)
+t_grid = np.linspace(t_0, T-k, M)
+print("Résolution numérique avec une grille temporelle de {} points".format(M))
+delta = 0.022
+print("Paramètres numérique : L = {}, T = {}s, h = {}, k = {}, delta = {}".format(L, T, h, k, delta))
 
-fig.suptitle('Schéma Upwind')
-ax[0].set_rmax(2)
-ax[0].set_rgrids([0.0,0.5, 1, 1.5],labels=['0.0','0.5', '1', '1.5'],fontsize=20)
-ax[0].set_frame_on(False)
-ax[0].set_thetamax(180)
-ax[0].set_thetagrids(angles=[0,180],labels=['rh=0','rh=$\pi$'],fontsize=15)
-ax[0].legend()
-ax[0].set_title(r'$|\kappa |$')
-ax[1].set_rmax(2)
-ax[1].set_rgrids([0.0,0.5, 1, 1.5],labels=['0.0','0.5', '1', '1.5'],fontsize=20)
-ax[1].set_frame_on(False)
-ax[1].set_thetamax(180)
-ax[1].set_thetagrids(angles=[0,180],labels=['rh=0','rh=$\pi$'],fontsize=15)
-ax[1].legend()
-ax[1].set_title(r'$\frac{\theta_{d}}{\theta_{a}}$')
+def ZK_KdV(U0, x_grid, t_grid, T, delta):
+    #Schéma ZK pour l équation de KdV
+    h = np.abs(x_grid[1]-x_grid[0])
+    k = np.abs(t_grid[1]-x_grid[0])
+    U = np.zeros((np.shape(x_grid)[0], np.shape(t_grid)[0]), dtype=np.float64)
+    M = np.shape(t_grid)[0]
+    U[:, 0] = U0
+    for j in range(M-1):
+        # Implémentation schéma
+        U[2:-2, j+1] = U[2:-2, j-1]-(1/3)*(k/h)*(U[3:-1, j]+U[2:-2, j]+U[1:-3,j])*(U[3:-1, j]-U[1:-3,j])-((delta**2)*k/(h**3))*(U[4:, j]-2*U[3:-1, j]
+        +2*U[1:-3, j]-U[0:-4, j])
+        # Conditions aux bords
+        U[0, j+1] = 0
+        U[1, j+1] = 0
+        U[-2, j+1] = 0
+        U[-1, j+1] = 0
+        #U[0,:] = U[-1,:]
+        #U[1,:] = U[-2,:]    #Tentative d'implémenter des conditions aux bords périodiques cfr plus bas mais ça ne change rien
+    return U
+
+#Initialisiation
+U0 = f_cos(x_grid)
+ZK = ZK_KdV(U0, x_grid, t_grid, T, delta)
+print(np.shape(ZK))
+print(ZK)
+
+#Plot d'instantanné avec la CI de cosech^2
+t_span = [0, 1/np.pi, 3.6/np.pi]
+n0 = 0
+plt.plot(x_grid, ZK[:, n0], label="$t = {:2.2f}s$".format(t_grid[n0]), marker=',')
+n1 = int(np.floor(t_span[1]/k))
+plt.plot(x_grid, ZK[:, n1], label="$t = 1/ \pi \;s$", marker='+')
+n2 = int(np.floor(t_span[2]/k))
+plt.plot(x_grid, ZK[:, n2], label="$t = 3.6/ \pi \; s$", marker='x')
+# plt.plot(uu[:, n], label="Theorical Solution $t = {:2.2f}s$".format(t[n]))
+#Même problème qu'au dessus le schéma est (dans l'état actuel de son implémentation) n'est pas du tout stable et je n'ai pas de
+#pour leurs temps de référence. Pour des instants 10**-4s après le début on voit déjà que ça part en couille.
+plt.ylim([-1, 1.5])
+plt.xlabel("$x$")
+plt.ylabel("$u(x,t)$")
+plt.title('Instantannés de la résolution de KdV par le schéma ZK, CI $= cos(\pi x)$, $\delta = {}$'.format(delta))
+plt.legend()
 plt.show()
+plt.close()
 
-#Lax-Wendroff
-ko=np.linspace(0.01,np.pi-0.001,100)
+######Condition initiale de sech^2#####
+h = 0.05
+k = 0.00004
+x_L = -20
+x_R = 20
+L = x_R - x_L
+N = L/h
+N = int(N)
+x_grid = np.linspace(x_L, x_R - h, N)
+print("Résolution numérique avec une grille spatiale de {} points".format(N))
+t_0 = 0
+T = 1.1
+M = T/k
+M = int(M)
+t_grid = np.linspace(t_0, T-k, M)
+print("Résolution numérique avec une grille temporelle de {} points".format(M))
+delta = 0.022
+print("Paramètres numérique : L = {}, T = {}s, h = {}, k = {}, delta = {}".format(L, T, h, k, delta))
 
-lmb=[0.25,0.5,0.75,1.]
-fig,ax=plt.subplots(1,2,figsize=(15,5),subplot_kw=dict(polar=True))
-for i in range(4):
-    ampl_R=1-lmb[i]**2+lmb[i]**2*np.cos(ko)
-    ampl_I=-lmb[i]*np.sin(ko)
-    ampl=1-lmb[i]**2+lmb[i]**2*np.cos(ko)+(1j)*(-lmb[i]*np.sin(ko))
-    ratio=np.arctan(ampl_I/ampl_R)/(-lmb[i]*ko)
-    ratio=np.arctan2(np.imag(ampl),np.real(ampl))/(-lmb[i]*ko)
-    ax[0].plot(ko,np.sqrt(ampl_R**2+ampl_I**2),label='lambda=%.2f'%(lmb[i]))
-    ax[1].plot(ko,np.abs(ratio),label='lambda=%.2f'%(lmb[i]))
+#Initialisiation
+U0 = f_sech(x_grid)
+ZK = ZK_KdV(U0, x_grid, t_grid, T, delta)
+print(np.shape(ZK))
+print(ZK)
 
-fig.suptitle('Schéma Lax-Wendroff')
-ax[0].set_rmax(2)
-ax[0].set_rgrids([0.0,0.5, 1, 1.5],labels=['0.0','0.5', '1', '1.5'],fontsize=20)
-ax[0].set_frame_on(False)
-ax[0].set_thetamax(180)
-ax[0].set_thetagrids(angles=[0,180],labels=['rh=0','rh=$\pi$'],fontsize=15)
-ax[0].legend()
-ax[0].set_title(r'$|\kappa |$')
-ax[1].set_rmax(2)
-ax[1].set_rgrids([0.0,0.5, 1, 1.5],labels=['0.0','0.5', '1', '1.5'],fontsize=20)
-ax[1].set_frame_on(False)
-ax[1].set_thetamax(180)
-ax[1].set_thetagrids(angles=[0,180],labels=['rh=0','rh=$\pi$'],fontsize=15)
-ax[1].legend()
-ax[1].set_title(r'$\frac{\theta_{d}}{\theta_{a}}$')
+#Plot d'instantanné avec la CI de sech^2
+M_span = [0, 0.25/k, 0.5/k,1.0/k]
+m0 = 0
+t0 = 0
+plt.plot(x_grid, ZK[:, m0], label="$t = {:2.2f}s$".format(t0), marker=',')
+m1 = int(np.floor(M_span[1]))
+t1 = m1*k
+plt.plot(x_grid, ZK[:, m1], label="$t = {:2.2f} \;s$".format(t1), marker='+')
+m2 = int(np.floor(M_span[2]))
+t2 = m2*k
+plt.plot(x_grid, ZK[:, m2], label="$t = {:2.2f}\; s$".format(t2), marker='x')
+m3 = int(np.floor(M_span[3]))
+t3 = m3*k
+plt.plot(x_grid, ZK[:, m3], label="$t = {:2.2f}\; s$".format(t3), marker='^')
+# plt.plot(uu[:, n], label="Theorical Solution $t = {:2.2f}s$".format(t[n]))
+#Même problème qu'au dessus le schéma est (dans l'état actuel de son implémentation) n'est pas du tout stable et je n'ai pas de
+#pour leurs temps de référence. Pour des instants 10**-4s après le début on voit déjà que ça part en couille.
+plt.ylim([-2,6])
+plt.xlabel("$x$")
+plt.ylabel("$u(x,t)$")
+plt.title('Instantannés de la résolution de KdV par le schéma ZK, CI = sech^2, $\delta = {}$'.format(delta))
+plt.legend()
 plt.show()
-
-
-#Leapfrog
-ko=np.linspace(0.01,np.pi-0.001,100)
-
-lmb=[0.25,0.5,0.75,0.9]
-fig,ax=plt.subplots(1,2,figsize=(15,5),subplot_kw=dict(polar=True))
-for i in range(4):
-    ampl_R=1-lmb[i]+lmb[i]*np.cos(ko)
-    ampl_I=-lmb[i]*np.sin(ko)
-    ampl=(-1j*lmb[i]*np.sin(ko)+np.sqrt(1-(lmb[i]*np.sin(ko))**2))
-    ratio=np.arctan2(np.imag(ampl),np.real(ampl))/(-lmb[i]*ko)
-    ax[0].plot(ko,np.abs(ampl),label='lambda=%.2f'%(lmb[i]))
-    ax[1].plot(ko,ratio,label='lambda=%.2f'%(lmb[i]))
-plt.show()
-fig.suptitle('Schéma Leapfrog')
-ax[0].set_rmax(2)
-ax[0].set_rgrids([0.0,0.5, 1, 1.5],labels=['0.0','0.5', '1', '1.5'],fontsize=20)
-ax[0].set_frame_on(False)
-ax[0].set_thetamax(180)
-ax[0].set_thetagrids(angles=[0,180],labels=['rh=0','rh=$\pi$'],fontsize=15)
-ax[0].legend()
-ax[0].set_title(r'$|\kappa |$')
-ax[1].set_rmax(2)
-ax[1].set_rgrids([0.0,0.5, 1, 1.5],labels=['0.0','0.5', '1', '1.5'],fontsize=20)
-ax[1].set_frame_on(False)
-ax[1].set_thetamax(180)
-ax[1].set_thetagrids(angles=[0,180],labels=['rh=0','rh=$\pi$'],fontsize=15)
-ax[1].legend()
-ax[1].set_title(r'$\frac{\theta_{d}}{\theta_{a}}$')
-plt.show()
+plt.close()
