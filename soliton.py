@@ -11,7 +11,7 @@ def f_cos(x_grid):
     for i in range(N):
         U0[i] = np.cos(np.pi*x_grid[i])
     return(U0)
-"""
+
 
 x_L = 0.0
 x_R = 2.0
@@ -92,7 +92,7 @@ plt.colorbar(a)
 plt.show()
 
 ######Condition initiale de sech^2#####
-"""
+
 def f_sech(x_grid):
     #fonction initiale de sech^2
     N = x_grid.size
@@ -102,7 +102,7 @@ def f_sech(x_grid):
     for i in range(N):
         U0[i] = A*(1/np.cosh(k*x_grid[i]))**2
     return(U0)
-"""
+
 h = 0.1739
 k = 0.00001
 x_L = -20
@@ -146,10 +146,10 @@ plt.title('Instantannés de la résolution de KdV par le schéma Upwind, CI = se
 plt.legend()
 plt.show()
 plt.close()
-"""
+
 #############################Exercice 2 Schéma ZK################################################
 ######Condition initiale de cos#####
-"""
+
 #Paramètres numériques et physiques.
 h = 0.01
 k = 0.00001
@@ -168,7 +168,7 @@ t_grid = np.linspace(t_0, T-k, M)
 print("Résolution numérique avec une grille temporelle de {} points".format(M))
 delta = 0.022
 print("Paramètres numérique : L = {}, T = {}s, h = {}, k = {}, delta = {}".format(L, T, h, k, delta))
-"""
+
 def ZK_KdV(U0, x_grid, t_grid, T, delta):
     #Schéma ZK pour l équation de KdV
     h = np.abs(x_grid[1]-x_grid[0])
@@ -188,7 +188,7 @@ def ZK_KdV(U0, x_grid, t_grid, T, delta):
         #U[0,:] = U[-1,:]
         #U[1,:] = U[-2,:]    #Tentative d'implémenter des conditions aux bords périodiques cfr plus bas mais ça ne change rien
     return U
-"""
+
 #Initialisiation
 U0 = f_cos(x_grid)
 ZK = ZK_KdV(U0, x_grid, t_grid, T, delta)
@@ -213,7 +213,7 @@ plt.title('Instantannés de la résolution de KdV par le schéma ZK, CI $= cos(\
 plt.legend()
 plt.show()
 plt.close()
-"""
+
 ######Condition initiale de sech^2#####
 h = 0.05
 k = 0.00004
