@@ -61,11 +61,12 @@ print(np.shape(Upwind))
 print(Upwind)
 
 #Plot d'instantanné avec la CI de cos()
+"""
 t_span = [0, 1/np.pi, 3.6/np.pi]
 n0 = 0
 plt.plot(x_grid, Upwind[:, n0], label="$t = {:2.2f}s$".format(t_grid[n0]), marker=',')
 n1 = int(np.floor(t_span[1]/k))
-t1 = 6000*k
+t1 = 7000*k
 plt.plot(x_grid, Upwind[:, 6000], label="$t = {:2.2f} \;s$".format(t1), marker='+')
 #Je veux plot au même temps de référence que ceux de l'article mais je ne sais pas pourquoi je n'ai plus aucune valeur
 #pour des temps plus grand que 0.06s, je suspecte les 'nan' qui apparaissent trop vite dans le matrice U comme étant
@@ -84,6 +85,18 @@ plt.legend()
 plt.show()
 plt.close()
 """
+t_span = [0, 0.01, 0.05, 0.06, 0.064]
+n = np.zeros(np.shape(t_span)[0])
+n = [int(t_span[i]/k) for i in range(np.shape(t_span)[0])]
+for i in range(np.shape(t_span)[0]):
+    plt.plot(x_grid, Upwind[:, n[i]], label="$t = {:2.2f}s$".format(t_span[i]), marker=',')
+plt.title('Instantannés de la résolution de KdV par le schéma Upwind, CI = $cos(\pi x)$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.4f}'.format(L, T, h, k, delta, alpha, beta))
+plt.xlabel('$x$')
+plt.ylabel('Amplitude')
+plt.legend()
+plt.show()
+"""
+
 #Plot 2D
 [xx,tt]=np.meshgrid(x_grid,t_grid)
 a = plt.contourf(xx,tt, Upwind.T)
@@ -93,6 +106,7 @@ plt.ylabel("t")
 #mais le graphe n'est pas bon.
 plt.colorbar(a)
 plt.show()
+"""
 """
 ######Condition initiale de sech^2#####
 
@@ -277,3 +291,4 @@ plt.title('Instantannés de la résolution de KdV par le schéma Upwind, CI = $s
 plt.legend()
 plt.show()
 plt.close()
+"""
