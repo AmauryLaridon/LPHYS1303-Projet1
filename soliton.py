@@ -123,7 +123,7 @@ def f_sech(x_grid):
         U0[i] = A*(1/np.cosh(k*x_grid[i]))**2
     return(U0)
 
-delta = 0.022
+delta = 0.0001
 h = 0.1739
 k = 0.0001
 x_L = -20
@@ -189,7 +189,7 @@ plt.show()
 ######Condition initiale de cos#####
 
 #Paramètres numériques et physiques.
-delta = 0.022
+delta = 0.001
 h = 0.01
 k = 0.0001
 x_L = 0

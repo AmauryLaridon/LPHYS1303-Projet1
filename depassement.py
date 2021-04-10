@@ -46,7 +46,7 @@ def time_ev(u_0, t_f, k, x_f, h):
     print("Paramètres numérique : L = {}, T = {}s, h = {}, k = {}, delta = {}".format(L, T, h, k, delta))
 
     #Plot semi-animé d'Instantanés
-    t_span = np.arange(0,8,0.4)
+    t_span = np.arange(0,8,0.1)
     n = np.zeros(np.shape(t_span)[0])
     for t in t_span:
         n = [int(t/k)]
@@ -59,7 +59,7 @@ def time_ev(u_0, t_f, k, x_f, h):
             plt.legend()
             plt.show(block=False)
             plt.pause(0.5)
-            plt.close()
+            plt.clf()
     #Plot d'Instantanés
     t_span = [0, 0.1, 3, 5]
     n = np.zeros(np.shape(t_span)[0])
