@@ -56,9 +56,10 @@ def time_ev(u_0, t_f, k, x_f, h):
             plt.title('Instantanés dépassement de solitons.\n $L = {}, h = {}, k = {}, T = {}, \delta = {}$'.format(x_f, h, k, t_f, delta))
             plt.xlabel('$x$')
             plt.ylabel('Amplitude')
+            plt.ylim([0,20])
             plt.legend()
             plt.show(block=False)
-            plt.pause(0.5)
+            plt.pause(0.05)
             plt.clf()
     #Plot d'Instantanés
     t_span = [0, 0.1, 3, 5]
