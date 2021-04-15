@@ -43,6 +43,13 @@ def solit(c1,a1,c2,a2):
 def cos2(x):
     return 0.5*cos(0.5*x-0.5*pi)**2
     
+    
+    
+# Cosinus bis
+def cos3(x):
+    return cos(pi*x)
+    
+    
 
 
 
@@ -53,17 +60,21 @@ def time_ev(u_0, t_f, k, x_f, h, snaps = []):
     x_range = [i*h for i in range(int(x_f/h))]
     U = []
     U.append([u_0(x) for x in x_range])
+    """u0 = max([abs(u) for u in U[0]])
+    alpha = k*u0/h
+    beta = (delta**2)*k/(h**3)
+    print(alpha, beta)"""
     
     t_range = [j*k for j in range(int(t_f/k))]
     for t in t_range[1:]:
-        u1 = U[-1]
+        u1 = [*U[-1], U[-1][0], U[-1][1]]
         
         if t == k:
             u2 = u1
         else:
             u2 = U[-2]
             
-        U.append([0,0] + [u2[i] - (k/(3*h)) *(u1[i+1] + u1[i] + u1[i-1]) * (u1[i+1] - u1[i-1]) - (delta**2) * (k/(h**3)) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2])  for i in range(2,len(u1)-2)] + [0,0])
+        U.append([u2[i] - (k/(3*h)) *(u1[i+1] + u1[i] + u1[i-1]) * (u1[i+1] - u1[i-1]) - (delta**2) * (k/(h**3)) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2])  for i in range(len(U[-1]))])
         
         
     for s in snaps:
@@ -85,4 +96,6 @@ def time_ev(u_0, t_f, k, x_f, h, snaps = []):
 if __name__ == "__main__":
     #time_ev(gauss, 12, 0.0005, 10, 0.05, [0,4,8,11.5])
     #time_ev(solit(8,15,16,5), 13, 0.001, 45, 0.5, [0,4,8,12])
-    time_ev(cos2, 8, 0.0001, 2*pi, 0.05, [0,1,4,5.5])
+    #time_ev(cos2, 8, 0.0001, 2*pi, 0.05, [0,1,4,5.5])
+    #time_ev(cos, 2, 0.00005, 4, 0.03, [0,0.2,0.6,1])
+    time_ev(cos3, 0.9, 0.00001, 2, 0.01, [0,1/pi, 0.88])
