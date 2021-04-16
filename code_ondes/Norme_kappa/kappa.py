@@ -32,4 +32,4 @@ for i,ka in enumerate(kappa) :
 plt.contourf(aa,bb, np.array(kappa))
 plt.xlabel("alpha")
 plt.ylabel("beta")
-plt.show()
+plt.show() 
