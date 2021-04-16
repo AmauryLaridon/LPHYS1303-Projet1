@@ -14,10 +14,10 @@ def gauss1(x):
     return (1/sqrt(2*np.pi*0.1)) * exp(-50*(x-2)**2)
     
 def gauss2(x):
-    return (1/sqrt(2*np.pi*0.2)) * exp(-25*(x-4)**2)
+    return (1/sqrt(2*np.pi*0.2)) * exp(-25*(x-3)**2)
     
 def gauss(x):
-    return gauss1(x) + gauss2(x)
+    return gauss1(x) + gauss2(x) 
 
 
 
@@ -41,7 +41,7 @@ def solit(c1,a1,c2,a2):
 
 # Cosinus
 def cos2(x):
-    return 0.5*cos(0.5*x-0.5*pi)**2
+    return 0.5*cos(0.5*x-0.5*pi)**2 + 0.1
     
     
     
@@ -94,8 +94,8 @@ def time_ev(u_0, t_f, k, x_f, h, snaps = []):
     
     
 if __name__ == "__main__":
-    #time_ev(gauss, 12, 0.0005, 10, 0.05, [0,4,8,11.5])
+    #time_ev(gauss, 12, 0.0005, 10, 0.05, [0,4,8, 11.5])
     #time_ev(solit(8,15,16,5), 13, 0.001, 45, 0.5, [0,4,8,12])
     #time_ev(cos2, 8, 0.0001, 2*pi, 0.05, [0,1,4,5.5])
-    #time_ev(cos, 2, 0.00005, 4, 0.03, [0,0.2,0.6,1])
+    #time_ev(np.cos, 2, 0.00005, 4, 0.03, [0,0.1,0.2,0.6,1])
     time_ev(cos3, 0.9, 0.00001, 2, 0.01, [0,1/pi, 0.88])

@@ -73,7 +73,13 @@ def time_ev(u_0, t_f, k, x_f, h, snaps = []):
     t_range = [j*k for j in range(int(t_f/k))]
     for t in t_range[1:]:
         u1 = [*U[-1], U[-1][0], U[-1][1]]
-        U.append([u1[i] - (k/h) *(u1[i] - u1[i-1])*u1[i] - (delta**2) * (k/(2*(h**3))) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2])  for i in range(len(U[-1]))])
+        nex = []
+        for i in range(len(U[-1])):
+            if u1[i] >= 0 :
+                nex.append(u1[i] - (k/h) *(u1[i] - u1[i-1])*u1[i] - (delta**2) * (k/(2*(h**3))) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2]))
+            else :
+                nex.append(u1[i] - (k/h) *(u1[i+1] - u1[i])*u1[i] - (delta**2) * (k/(2*(h**3))) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2]))
+        U.append(nex)
         
     for s in snaps:
         plt.plot(x_range, U[int(s/k)], label = "t = {}".format(s))
@@ -95,5 +101,5 @@ if __name__ == "__main__":
     #time_ev(gauss, 12, 0.0005, 10, 0.05, [0,4,8,11.5])
     #time_ev(solit(8,15,16,5), 13, 0.001, 45, 0.5, [0,4,8,12])
     #time_ev(cos2, 8, 0.0001, 2*pi, 0.05, [0,1,4,5.5])
-    #time_ev(cos, 0.601, 0.00001, 4, 0.1, [0,0.1,0.2,0.6])
-    time_ev(cos3, 0.24, 0.00001, 2, 0.01, [0,0.15, 0.23])
+    #time_ev(cos, 2.501, 0.00001, 4, 0.1, [0,0.3,1,2.5])
+    time_ev(cos3, 1.2, 0.00001, 2, 0.01, [0,1/pi, 3.6/pi])
