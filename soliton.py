@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
-
+#Test
 ###################################Exercice 1 Schéma Upwind###############################
 def f_cos(x_grid):
     #fonction initiale de cos
@@ -12,8 +12,8 @@ def f_cos(x_grid):
     return(U0)
 
 delta = 0.022
-#alpha = 0.3
-#beta = 0.075
+#alpha = -0.5
+#beta = 0.04
 w0 = 1
 #h = np.sqrt(alpha*(delta**2)/2*w0*beta)
 #k = h*alpha/w0
@@ -35,7 +35,7 @@ t_grid = np.linspace(t_0, T-k, M)
 alpha = (k/h)*w0
 beta = (delta**2)*k/(2*(h**3))
 print("Résolution numérique avec une grille temporelle de {} points".format(M))
-print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.4f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.4f}".format(L, T, h, k, delta, alpha, beta))
+print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.6f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.4f}".format(L, T, h, k, delta, alpha, beta))
 
 
 def Upwind_KdV(U0, x_grid, t_grid, T, delta):
@@ -47,8 +47,13 @@ def Upwind_KdV(U0, x_grid, t_grid, T, delta):
     U[:, 0] = U0
     for j in range(M-1):
         # Implémentation schéma
-        U[2:-2, j+1] = U[2:-2, j]-(k/h)*(U[2:-2, j]-U[1:-3, j])*U[2:-2, j]-((delta**2)*k/(2*(h)**3))*(U[4:, j]-2*U[3:-1, j]
-        +2*U[1:-3, j]-U[0:-4, j])
+        if any(U[2:-2,j])>0:
+            U[2:-2, j+1] = U[2:-2, j]-(k/h)*(U[2:-2, j]-U[1:-3, j])*U[2:-2, j]-((delta**2)*k/(2*(h)**3))*(U[4:, j]-2*U[3:-1, j]
+            +2*U[1:-3, j]-U[0:-4, j])
+        elif any(U[2:-2,j])<0:
+            print('changement schéma')
+            U[2:-2, j+1] = U[2:-2, j]-(k/h)*(-U[2:-2, j]+U[1:-3, j])*U[2:-2, j]-((delta**2)*k/(2*(h)**3))*(U[4:, j]-2*U[3:-1, j]
+            +2*U[1:-3, j]-U[0:-4, j])
         # Conditions aux bords
         #U[0,:] = U[-1,:]
         U[0, j+1] = 0
@@ -62,7 +67,7 @@ def Upwind_KdV(U0, x_grid, t_grid, T, delta):
 U0 = f_cos(x_grid)
 Upwind = Upwind_KdV(U0, x_grid, t_grid, T, delta)
 print(np.shape(Upwind))
-print(Upwind)
+print(Upwind[100,:])
 
 #Plot d'instantanné avec la CI de cos()
 
@@ -110,6 +115,7 @@ plt.ylabel("t")
 #mais le graphe n'est pas bon.
 plt.colorbar(a)
 plt.show()
+"""
 """
 ######Condition initiale de sech^2#####
 
@@ -308,3 +314,4 @@ plt.title('Instantannés de la résolution de KdV par le schéma Upwind, CI = $s
 plt.legend()
 plt.show()
 plt.close()
+"""
