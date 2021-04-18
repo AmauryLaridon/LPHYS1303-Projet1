@@ -8,17 +8,34 @@ from matplotlib.pyplot import cm
 
 
 def onde1(x):
+    """Fonction de condition initiale gaussienne"""
     return (1/sqrt(2*np.pi*0.01)) * exp(-50*(x-1)**2)
 
 def onde2(x):
     return (1/sqrt(2*np.pi*0.4)) * exp(-1.25*(x-5)**2)
 
 def u0(x):
+    """Fonction de condition initiale comme superposition deux ondes"""
     return onde1(x) + onde2(x)
+    
+def soliton1(x,c,a):
+    """Fonction de condition initiale comme solution analytique d'un soliton."""
+    return 0.5*c*(pi*hypsecant.pdf((x-a)*sqrt(c)/2))**2
+
+def soliton2(x,c,a):
+    return 0.5*c*(pi*hypsecant.pdf((x-a)*sqrt(c)/2))**2
+
+def solit(c1,a1,c2,a2):
+    """Fonction de condition initiale comme superposition deux solitons"""
+    def sol_(x):
+        return soliton1(x,c1,a1) + soliton2(x,c2,a2)
+    return sol_
+
 
 delta = 0.022
 
 def time_ev(u_0, t_f, k, x_f, h):
+    """Résolution numérique de l'équation de KdV sur base du schéma de Zabusky-Krustal"""
     x_0 = 0
     L = x_f- x_0
     N = L/h
@@ -50,10 +67,9 @@ def time_ev(u_0, t_f, k, x_f, h):
     n = np.zeros(np.shape(t_span)[0])
     for t in t_span:
         n = [int(t/k)]
-        #for j in range(np.shape(t_span)[0]):
         if n[0] < len(U):
             plt.plot(x_range, U[n[0]], label = "$t={:2.2f}\; s$".format(t), marker ='.')
-            plt.title('Instantanés dépassement de solitons.\n $L = {}, h = {}, k = {}, T = {}, \delta = {}$'.format(x_f, h, k, t_f, delta))
+            plt.title('Instantanés dépassement de solitons sur base du schéma ZK.\n $L = {}, h = {}, k = {}, T = {}, \delta = {}$'.format(x_f, h, k, t_f, delta))
             plt.xlabel('$x$')
             plt.ylabel('Amplitude')
             plt.ylim([0,20])
@@ -61,13 +77,14 @@ def time_ev(u_0, t_f, k, x_f, h):
             plt.show(block=False)
             plt.pause(0.05)
             plt.clf()
+    plt.close()
     #Plot d'Instantanés
     t_span = [0, 0.1, 3, 5]
     n = np.zeros(np.shape(t_span)[0])
     n = [int(t_span[i]/k) for i in range(np.shape(t_span)[0])]
     for i in range(np.shape(t_span)[0]):
         plt.plot(x_range, U[n[i]], label="$t = {:2.2f}s$".format(t_span[i]), marker=',')
-    plt.title('Instantanés dépassement de solitons.\n $L = {}, h = {}, k = {}, T = {}, \delta = {}$'.format(x_f, h, k, t_f, delta))
+    plt.title('Instantanés dépassement de solitons sur base du schéma ZK.\n $L = {}, h = {}, k = {}, T = {}, \delta = {}$'.format(x_f, h, k, t_f, delta))
     plt.xlabel('$x$')
     plt.ylabel('Amplitude')
     plt.legend()
@@ -98,7 +115,7 @@ def time_ev(u_0, t_f, k, x_f, h):
     animation = FuncAnimation(fig, func=animation_frame, frames = np.arange(0, 10, 0.01), interval = 1)
     plt.show()
     """
-    #Plot 2D
+    #Plot du Meshgrid
     [xx,tt]=np.meshgrid(x_range,t_range)
     plt.contourf(xx,tt, np.array(U), levels = 10)
     plt.title('Dépassement de solitons.\n $L = {}, h = {}, k = {}, T = {}, \delta = {}$'.format(x_f, h, k, t_f, delta))
@@ -107,18 +124,6 @@ def time_ev(u_0, t_f, k, x_f, h):
     plt.colorbar()
     plt.show()
     plt.clf()
-
-def soliton1(x,c,a):
-    return 0.5*c*(pi*hypsecant.pdf((x-a)*sqrt(c)/2))**2
-
-def soliton2(x,c,a):
-    return 0.5*c*(pi*hypsecant.pdf((x-a)*sqrt(c)/2))**2
-
-def solit(c1,a1,c2,a2):
-    def sol_(x):
-        return soliton1(x,c1,a1) + soliton2(x,c2,a2)
-    return sol_
-
 
 if __name__ == "__main__":
     time_ev(solit(20,15,40,5), 6, 0.0005, 40, 0.5)

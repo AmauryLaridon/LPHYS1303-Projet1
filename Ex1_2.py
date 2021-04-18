@@ -4,20 +4,22 @@ import numpy as np
 from numpy import sqrt, pi ,exp, cos, sin
 from scipy.stats import hypsecant
 
-################################### Norme |kappa|^2###############################
+################################### Norme |kappa|^2#################################################
 def k(alpha, beta):
+    """Calcul du facteur d'amplifcation du schéma Upwind"""
     rh = np.arange(0,4*pi, 0.05)
     kap = [(1+2*alpha*(sin(x/2)**2))**2 + (sin(x)**2)*(alpha - 4*beta*(sin(x/2)**2))**2 for x in rh]
     return max(kap)
 
-al = np.arange(-1.1,0.1, 0.05)
-be = np.arange(-0.7,0.3, 0.05)
+al = np.arange(-1.1,0.1, 0.05) #Paramètres numériques alpha
+be = np.arange(-0.7,0.3, 0.05) #Paramètre numériques beta
 
 kappa = [[k(a,b) for a in al] for b in be]
 
 [aa,bb]=np.meshgrid(al,be)
 levels = np.arange(0,6,0.5)
 plt.contourf(aa,bb, np.array(kappa), levels)
+plt.title('Module carré du facteur d\'amplification $\kappa$ en fonction des paramètres numériques.')
 plt.xlabel("alpha")
 plt.ylabel("beta")
 plt.colorbar()
@@ -30,29 +32,27 @@ for i,ka in enumerate(kappa) :
         else:
             kappa[i][j] = 0
 
-levels = [0,1,1001]
+levels = [0,1,1000] #Échelle choisie de telle sorte qu'elle met en avant le domaine de stabilité.
 plt.contourf(aa,bb, np.array(kappa), levels)
+plt.title('Module carré du facteur d\'amplification $\kappa$ en fonction des paramètres numériques.')
 plt.xlabel("alpha")
 plt.ylabel("beta")
 plt.colorbar()
 plt.show()
 
-
-
-
-
-
 ################################### Exercice 1 Schéma Upwind ###############################
 def f_cos(x):
-    #fonction initiale de cos
+    """Condition initiale de cos(\pi x)"""
     return np.cos(np.pi*x)
 
 def f_sech(x):
+    """Condition initiale de sech^2"""
     return 0.5*(pi*hypsecant.pdf(x/2))**2
 
 
 
 def Upwind_KdV(u_0, delta, x_L, x_R, h, k, T):
+    """Implémentation du schéma Upwind pour la résolution de l'équation de KdV"""
     x_grid = np.arange(x_L, x_R - h, h)
     print("Résolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T-k, k)
@@ -72,7 +72,7 @@ def Upwind_KdV(u_0, delta, x_L, x_R, h, k, T):
         u1 = [*U[-1], U[-1][0], U[-1][1]] # Conditions aux bord périodiques
         nex = []
         for i in range(len(U[-1])):
-            if u1[i] >= 0 :
+            if u1[i] >= 0 : #Test du signe de u_{i,j} afin d'adapter le schéma pour toujours être dans du Upwind
                 nex.append(u1[i] - (k/h) *(u1[i] - u1[i-1])*u1[i] - (delta**2) * (k/(2*(h**3))) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2]))
             else :
                 nex.append(u1[i] - (k/h) *(u1[i+1] - u1[i])*u1[i] - (delta**2) * (k/(2*(h**3))) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2]))
@@ -82,6 +82,7 @@ def Upwind_KdV(u_0, delta, x_L, x_R, h, k, T):
 
 
 def ZK_KdV(u_0, delta, x_L, x_R, h, k, T):
+    """Implémentation du schéma ZK pour la résolution de l'équation de KdV"""
     x_grid = np.arange(x_L, x_R - h, h)
     print("Résolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T-k, k)
@@ -96,7 +97,6 @@ def ZK_KdV(u_0, delta, x_L, x_R, h, k, T):
     beta = (delta**2)*k/(2*(h**3))
     print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.4f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.4f}".format(L, T, h, k, delta, alpha, beta))
 
-
     for t in t_grid[1:]:
         u1 = [*U[-1], U[-1][0], U[-1][1]]
 
@@ -109,9 +109,7 @@ def ZK_KdV(u_0, delta, x_L, x_R, h, k, T):
     return U, x_grid, t_grid, [L, T, h, k, delta, alpha, beta]
 
 
-
-
-#Plot d'instantanné avec la CI de cos()
+#Plot d'instantanné avec les diffentes conditions intiales
 def snaps_KdV(U, t_range, schema, CI, parametres):
     ma = []
     mi = []
@@ -130,8 +128,8 @@ def snaps_KdV(U, t_range, schema, CI, parametres):
     plt.show()
     plt.close()
 
+#Meshgrid
 def contour_KdV(U, schema, CI, parametres):
-    #Plot 2D
     [xx,tt]=np.meshgrid(U[1],U[2])
     plt.contourf(xx,tt, np.array(U[0]))
     plt.title('Meshgrid de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.4f}'.format(schema, CI, *parametres))
@@ -140,15 +138,12 @@ def contour_KdV(U, schema, CI, parametres):
     plt.colorbar()
     plt.show()
 
-
 #Initialisation Upwind cos
 Upwind = Upwind_KdV(f_cos, 0.022, 0, 2, 0.01, 0.00001, 1.3)
 param = Upwind[3]
 t_span = [0, 1/np.pi, 3.6/np.pi]
 snaps_KdV(Upwind, t_span, "Upwind", "cos(\pi x)", param)
 contour_KdV(Upwind, "Upwind", "cos(\pi x)", param)
-
-
 
 #Initialisation Upwind soliton
 Upwind = Upwind_KdV(f_sech, 0.022, -10, 10, 0.1739, 0.0001, 2.01)
@@ -157,15 +152,12 @@ t_span = [0, 0.5, 1, 2]
 snaps_KdV(Upwind, t_span, "Upwind", "0.5\ \sech(x/2)^2", param)
 contour_KdV(Upwind, "Upwind", "0.5\  \sech(x/2)^2", param)
 
-
 #Initialisation ZK cos
 ZK = ZK_KdV(f_cos, 0.022, 0, 2, 0.01, 0.00001, 1.3)
 param = ZK[3]
 t_span = [0, 1/np.pi, 3.6/np.pi]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "cos(\pi x)", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "cos(\pi x)", param)
-
-
 
 #Initialisation ZK soliton
 ZK = ZK_KdV(f_sech, 0.022, -10, 10, 0.1739, 0.0001, 2.01)
