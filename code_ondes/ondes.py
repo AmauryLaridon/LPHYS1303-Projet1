@@ -75,6 +75,8 @@ def time_ev(u_0, t_f, k, x_f, h, snaps = []):
             u2 = U[-2]
             
         U.append([u2[i] - (k/(3*h)) *(u1[i+1] + u1[i] + u1[i-1]) * (u1[i+1] - u1[i-1]) - (delta**2) * (k/(h**3)) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2])  for i in range(len(U[-1]))])
+        if int(t/k)%100000 == 0:
+            print("t = ",t)
         
         
     for s in snaps:
@@ -98,4 +100,4 @@ if __name__ == "__main__":
     #time_ev(solit(8,15,16,5), 13, 0.001, 45, 0.5, [0,4,8,12])
     #time_ev(cos2, 8, 0.0001, 2*pi, 0.05, [0,1,4,5.5])
     #time_ev(np.cos, 2, 0.00005, 4, 0.03, [0,0.1,0.2,0.6,1])
-    time_ev(cos3, 0.9, 0.00001, 2, 0.01, [0,1/pi, 0.88])
+    time_ev(cos3, 0.9, 0.00001, 2, 0.01, [0,1/pi, 0.5])

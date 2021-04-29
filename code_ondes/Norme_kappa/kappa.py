@@ -15,7 +15,8 @@ be = np.arange(-0.7,0.3, 0.05)
 kappa = [[k(a,b) for a in al] for b in be]
 
 [aa,bb]=np.meshgrid(al,be)
-plt.contourf(aa,bb, np.array(kappa), levels = 10)
+levels = np.arange(0,6,0.5)
+plt.contourf(aa,bb, np.array(kappa), levels)
 plt.xlabel("alpha")
 plt.ylabel("beta")
 plt.colorbar()
@@ -28,8 +29,10 @@ for i,ka in enumerate(kappa) :
             kappa[i][j] = 1000
         else:
             kappa[i][j] = 0
-        
-plt.contourf(aa,bb, np.array(kappa))
+
+levels = [0,1,1001]
+plt.contourf(aa,bb, np.array(kappa), levels)
 plt.xlabel("alpha")
 plt.ylabel("beta")
-plt.show() 
+plt.colorbar()
+plt.show()
