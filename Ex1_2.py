@@ -65,7 +65,7 @@ def Upwind_KdV(u_0, delta, x_L, x_R, h, k, T):
     w0 = max(U[0])
     alpha = (k/h)*w0
     beta = (delta**2)*k/(2*(h**3))
-    print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.4f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.4f}".format(L, T, h, k, delta, alpha, beta))
+    print("Paramètres numérique : L = {}, T = {}s, h = {:2.6f}, k = {:2.6f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.4f}".format(L, T, h, k, delta, alpha, beta))
 
 
     for t in t_grid[1:]:
