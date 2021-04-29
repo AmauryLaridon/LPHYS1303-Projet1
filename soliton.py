@@ -45,7 +45,7 @@ def Upwind_KdV(U0, x_grid, t_grid, T, delta):
     U = np.zeros((np.shape(x_grid)[0], np.shape(t_grid)[0]), dtype=np.float64)
     M = np.shape(t_grid)[0]
     U[:, 0] = U0
-    for j in range(M-1):
+
         # Implémentation schéma
         if any(U[2:-2,j])>0:
             U[2:-2, j+1] = U[2:-2, j]-(k/h)*(U[2:-2, j]-U[1:-3, j])*U[2:-2, j]-((delta**2)*k/(2*(h)**3))*(U[4:, j]-2*U[3:-1, j]
