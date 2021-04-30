@@ -62,8 +62,8 @@ def f_cos(x):
     return 0.5*(pi*hypsecant.pdf(x/2))**2"""
     
 def f_sech(x):
-    u_0 = 2
-    u_inf = 0
+    u_0 = 0.5
+    u_inf = 0.1
     x_0 = 0
     Delta = delta/sqrt((u_0-u_inf)/12)
     return u_inf + (u_0-u_inf)*(pi*hypsecant.pdf((x-x_0)/Delta))**2
@@ -75,10 +75,10 @@ def f_sech(x):
     return sol_"""
     
 def solit(u1,x1,u2,x2):
-    Delta_1 = delta/sqrt(u_1/12)
-    Delta_2 = delta/sqrt(u_1/12)
+    Delta1 = delta/sqrt(u1/12)
+    Delta2 = delta/sqrt(u2/12)
     def sol_(x):
-        return u_1*(pi*hypsecant.pdf((x-x_1)/Delta_1))**2 + u_2*(pi*hypsecant.pdf((x-x_2)/Delta_2))**2
+        return u1*(pi*hypsecant.pdf((x-x1)/Delta1))**2 + u2*(pi*hypsecant.pdf((x-x2)/Delta2))**2
     return sol_
 
 
@@ -100,13 +100,13 @@ def Upwind_KdV(u_0, x_L, x_R, h, k, T):
     
     
     for t in t_grid[1:]:
-        u1 = [*U[-1], U[-1][0], U[-1][1]] # Conditions aux bord périodiques
+        u1 = [U[-1][-2], U[-1][-1], *U[-1], U[-1][0], U[-1][1]] # Conditions aux bord périodiques
         nex = []
         for i in range(len(U[-1])):
-            if u1[i] >= 0 :
-                nex.append(u1[i] - (k/h) *(u1[i] - u1[i-1])*u1[i] - (delta**2) * (k/(2*(h**3))) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2]))
+            if u1[i+2] >= 0 :
+                nex.append(u1[i+2] - (k/h) *(u1[i+2] - u1[i+1])*u1[i+2] - (delta**2) * (k/(2*(h**3))) * (u1[i+4] - 2*u1[i+3] + 2*u1[i+1] - u1[i]))
             else :
-                nex.append(u1[i] - (k/h) *(u1[i+1] - u1[i])*u1[i] - (delta**2) * (k/(2*(h**3))) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2]))
+                nex.append(u1[i+2] - (k/h) *(u1[i+3] - u1[i+2])*u1[i+2] - (delta**2) * (k/(2*(h**3))) * (u1[i+4] - 2*u1[i+3] + 2*u1[i+1] - u1[i]))
         U.append(nex)
     return U, x_grid, t_grid, [L, T, h, k, delta, alpha, beta]
     
@@ -129,14 +129,14 @@ def ZK_KdV(u_0, x_L, x_R, h, k, T):
     
     
     for t in t_grid[1:]:
-        u1 = [*U[-1], U[-1][0], U[-1][1]]
+        u1 = [U[-1][-2], U[-1][-1], *U[-1], U[-1][0], U[-1][1]]
         
         if t == k:
             u2 = u1
         else:
             u2 = U[-2]
             
-        U.append([u2[i] - (k/(3*h)) *(u1[i+1] + u1[i] + u1[i-1]) * (u1[i+1] - u1[i-1]) - (delta**2) * (k/(h**3)) * (u1[i+2] - 2*u1[i+1] + 2*u1[i-1] - u1[i-2])  for i in range(len(U[-1]))])
+        U.append([u2[i] - (k/(3*h)) *(u1[i+3] + u1[i+2] + u1[i+1]) * (u1[i+3] - u1[i+1]) - (delta**2) * (k/(h**3)) * (u1[i+4] - 2*u1[i+3] + 2*u1[i+1] - u1[i])  for i in range(len(U[-1]))])
     return U, x_grid, t_grid, [L, T, h, k, delta, alpha, beta]   
 
     
@@ -171,7 +171,7 @@ def contour_KdV(U, schema, CI, parametres):
     plt.colorbar()
     plt.show()
 
-"""
+
 #Initialisation Upwind cos
 Upwind = Upwind_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.3)
 param = Upwind[3]
@@ -195,13 +195,13 @@ param = ZK[3]
 t_span = [0, 1/np.pi, 3.6/np.pi]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "cos(\pi x)", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "cos(\pi x)", param)
-"""
+
 
 
 #Initialisation ZK soliton
-ZK = ZK_KdV(f_sech, -1, 2, 0.01, 0.00008, 1.21)
+ZK = ZK_KdV(f_sech, -1, 1, 0.01, 0.0001, 6.01)
 param = ZK[3]
-t_span = [0, 0.5, 1, 1.2]
+t_span = [0, 2, 3, 4]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "0.5\ \sech(x/2)^2", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
 
