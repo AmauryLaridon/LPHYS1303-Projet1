@@ -57,10 +57,6 @@ def f_cos(x):
     #fonction initiale de cos
     return np.cos(np.pi*x)
 
-
-"""def f_sech(x):
-    return 0.5*(pi*hypsecant.pdf(x/2))**2"""
-    
 def f_sech(x):
     u_0 = 0.5
     u_inf = 0.1
@@ -73,7 +69,7 @@ def f_sech(x):
     def sol_(x):
         return 0.5*c1*(pi*hypsecant.pdf((x-a1)*sqrt(c1)/2))**2 + 0.5*c2*(pi*hypsecant.pdf((x-a2)*sqrt(c2)/2))**2
     return sol_"""
-    
+
 def solit(u1,x1,u2,x2):
     Delta1 = delta/sqrt(u1/12)
     Delta2 = delta/sqrt(u2/12)
@@ -88,17 +84,17 @@ def Upwind_KdV(u_0, x_L, x_R, h, k, T):
     print("Résolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T-k, k)
     print("Résolution numérique avec une grille temporelle de {} points".format(len(t_grid)))
-    
+
     L = x_R - x_L
     U = []
     U.append([u_0(x) for x in x_grid])
-    
+
     w0 = max(U[0])
     alpha = (k/h)*w0
     beta = (delta**2)*k/(2*(h**3))
-    print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.4f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.4f}".format(L, T, h, k, delta, alpha, beta))
-    
-    
+    print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.6f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
+
+
     for t in t_grid[1:]:
         u1 = [U[-1][-2], U[-1][-1], *U[-1], U[-1][0], U[-1][1]] # Conditions aux bord périodiques
         nex = []
@@ -109,37 +105,37 @@ def Upwind_KdV(u_0, x_L, x_R, h, k, T):
                 nex.append(u1[i+2] - (k/h) *(u1[i+3] - u1[i+2])*u1[i+2] - (delta**2) * (k/(2*(h**3))) * (u1[i+4] - 2*u1[i+3] + 2*u1[i+1] - u1[i]))
         U.append(nex)
     return U, x_grid, t_grid, [L, T, h, k, delta, alpha, beta]
-    
-    
+
+
 
 def ZK_KdV(u_0, x_L, x_R, h, k, T):
     x_grid = np.arange(x_L, x_R - h, h)
     print("Résolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T-k, k)
     print("Résolution numérique avec une grille temporelle de {} points".format(len(t_grid)))
-    
+
     L = x_R - x_L
     U = []
     U.append([u_0(x) for x in x_grid])
-    
+
     w0 = max(U[0])
     alpha = (k/h)*w0
     beta = (delta**2)*k/(2*(h**3))
-    print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.4f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.4f}".format(L, T, h, k, delta, alpha, beta))
-    
-    
+    print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.4f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
+
+
     for t in t_grid[1:]:
         u1 = [U[-1][-2], U[-1][-1], *U[-1], U[-1][0], U[-1][1]]
-        
+
         if t == k:
             u2 = u1
         else:
             u2 = U[-2]
-            
-        U.append([u2[i] - (k/(3*h)) *(u1[i+3] + u1[i+2] + u1[i+1]) * (u1[i+3] - u1[i+1]) - (delta**2) * (k/(h**3)) * (u1[i+4] - 2*u1[i+3] + 2*u1[i+1] - u1[i])  for i in range(len(U[-1]))])
-    return U, x_grid, t_grid, [L, T, h, k, delta, alpha, beta]   
 
-    
+        U.append([u2[i] - (k/(3*h)) *(u1[i+3] + u1[i+2] + u1[i+1]) * (u1[i+3] - u1[i+1]) - (delta**2) * (k/(h**3)) * (u1[i+4] - 2*u1[i+3] + 2*u1[i+1] - u1[i])  for i in range(len(U[-1]))])
+    return U, x_grid, t_grid, [L, T, h, k, delta, alpha, beta]
+
+
 
 
 #Plot d'instantanné avec la CI de cos()
@@ -156,16 +152,16 @@ def snaps_KdV(U, t_range, schema, CI, parametres):
     plt.ylim([MI-0.2, MA+0.2])
     plt.xlabel("$x$")
     plt.ylabel("$u(x,t)$")
-    plt.title('Instantanés de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.4f}'.format(schema, CI, *parametres))
+    plt.title('Instantanés de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.6f}'.format(schema, CI, *parametres))
     plt.legend()
     plt.show()
     plt.close()
-    
+
 def contour_KdV(U, schema, CI, parametres):
     #Plot 2D
     [xx,tt]=np.meshgrid(U[1],U[2])
     plt.contourf(xx,tt, np.array(U[0]))
-    plt.title('Meshgrid de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.4f}'.format(schema, CI, *parametres))
+    plt.title('Meshgrid de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.6f}'.format(schema, CI, *parametres))
     plt.xlabel("x")
     plt.ylabel("t")
     plt.colorbar()
@@ -206,13 +202,11 @@ snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "0.5\ \sech(x/2)^2", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
 
 
-
+"""
 #Initialisation ZK dépassement solitons
 ZK = ZK_KdV(solit(8,15,16,5), 0, 45, 0.05, 0.0001, 13.01)
 param = ZK[3]
 t_span = [0, 4, 8, 12]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "Dépassement solitons", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
-
-
-
+"""
