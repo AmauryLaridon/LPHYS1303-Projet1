@@ -23,8 +23,9 @@ kappa = [[k(a,b) for a in al] for b in be]
 [aa,bb]=np.meshgrid(al,be)
 levels = np.arange(0,6,0.5)
 plt.contourf(aa,bb, np.array(kappa), levels)
-plt.xlabel("alpha")
-plt.ylabel("beta")
+plt.xlabel("$α$")
+plt.ylabel("$β$")
+plt.title("Module carré du facteur d'amplification $\kappa$ en fonction des paramètres numériques")
 plt.colorbar()
 plt.show()
 
@@ -37,8 +38,9 @@ for i,ka in enumerate(kappa) :
 
 levels = [0,1,1001]
 plt.contourf(aa,bb, np.array(kappa), levels)
-plt.xlabel("alpha")
-plt.ylabel("beta")
+plt.xlabel("$α$")
+plt.ylabel("$β$")
+plt.title("Domaine sur lequel le module de $\kappa$ est inférieur à 1")
 plt.colorbar()
 plt.show()
 
@@ -52,8 +54,15 @@ def f_cos(x):
     #fonction initiale de cos
     return np.cos(np.pi*x)
 
+
 def f_sech(x):
     return 0.5*(pi*hypsecant.pdf(x/2))**2
+
+
+def solit(c1,a1,c2,a2):
+    def sol_(x):
+        return 0.5*c1*(pi*hypsecant.pdf((x-a1)*sqrt(c1)/2))**2 + 0.5*c2*(pi*hypsecant.pdf((x-a2)*sqrt(c2)/2))**2
+    return sol_
 
 
 
@@ -177,6 +186,14 @@ ZK = ZK_KdV(f_sech, 0.022, -10, 10, 0.1739, 0.0001, 2.01)
 param = ZK[3]
 t_span = [0, 0.5, 1, 2]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "0.5\ \sech(x/2)^2", param)
+contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
+
+
+#Initialisation ZK dépassement solitons
+ZK = ZK_KdV(solit(8,15,16,5), 0.022, 0, 45, 0.5, 0.001, 13.01)
+param = ZK[3]
+t_span = [0, 4, 8, 12]
+snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "Dépassement solitons", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
 
 
