@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy import sqrt, pi ,exp, cos, sin
+from numpy import sqrt, pi ,exp, cos, sin, sqrt
 from scipy.stats import hypsecant
 
 
@@ -19,7 +19,7 @@ al = np.arange(-1.1,0.1, 0.05)
 be = np.arange(-0.7,0.3, 0.05)
 
 kappa = [[k(a,b) for a in al] for b in be]
-
+"""
 [aa,bb]=np.meshgrid(al,be)
 levels = np.arange(0,6,0.5)
 plt.contourf(aa,bb, np.array(kappa), levels)
@@ -44,29 +44,46 @@ plt.title("Domaine sur lequel le module de $\kappa$ est inférieur à 1")
 plt.colorbar()
 plt.show()
 
-
+"""
 
 
 
 
 ################################### Exercice 1 Schéma Upwind ###############################
+delta = 0.022
+
+
 def f_cos(x):
     #fonction initiale de cos
     return np.cos(np.pi*x)
 
 
+"""def f_sech(x):
+    return 0.5*(pi*hypsecant.pdf(x/2))**2"""
+    
 def f_sech(x):
-    return 0.5*(pi*hypsecant.pdf(x/2))**2
+    u_0 = 2
+    u_inf = 0
+    x_0 = 0
+    Delta = delta/sqrt((u_0-u_inf)/12)
+    return u_inf + (u_0-u_inf)*(pi*hypsecant.pdf((x-x_0)/Delta))**2
 
 
-def solit(c1,a1,c2,a2):
+"""def solit(c1,a1,c2,a2):
     def sol_(x):
         return 0.5*c1*(pi*hypsecant.pdf((x-a1)*sqrt(c1)/2))**2 + 0.5*c2*(pi*hypsecant.pdf((x-a2)*sqrt(c2)/2))**2
+    return sol_"""
+    
+def solit(u1,x1,u2,x2):
+    Delta_1 = delta/sqrt(u_1/12)
+    Delta_2 = delta/sqrt(u_1/12)
+    def sol_(x):
+        return u_1*(pi*hypsecant.pdf((x-x_1)/Delta_1))**2 + u_2*(pi*hypsecant.pdf((x-x_2)/Delta_2))**2
     return sol_
 
 
 
-def Upwind_KdV(u_0, delta, x_L, x_R, h, k, T):
+def Upwind_KdV(u_0, x_L, x_R, h, k, T):
     x_grid = np.arange(x_L, x_R - h, h)
     print("Résolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T-k, k)
@@ -95,7 +112,7 @@ def Upwind_KdV(u_0, delta, x_L, x_R, h, k, T):
     
     
 
-def ZK_KdV(u_0, delta, x_L, x_R, h, k, T):
+def ZK_KdV(u_0, x_L, x_R, h, k, T):
     x_grid = np.arange(x_L, x_R - h, h)
     print("Résolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T-k, k)
@@ -156,7 +173,7 @@ def contour_KdV(U, schema, CI, parametres):
 
 
 #Initialisation Upwind cos
-Upwind = Upwind_KdV(f_cos, 0.022, 0, 2, 0.01, 0.00001, 1.3)
+Upwind = Upwind_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.3)
 param = Upwind[3]
 t_span = [0, 1/np.pi, 3.6/np.pi]
 snaps_KdV(Upwind, t_span, "Upwind", "cos(\pi x)", param)
@@ -165,7 +182,7 @@ contour_KdV(Upwind, "Upwind", "cos(\pi x)", param)
 
 
 #Initialisation Upwind soliton
-Upwind = Upwind_KdV(f_sech, 0.022, -10, 10, 0.1739, 0.0001, 2.01)
+Upwind = Upwind_KdV(f_sech, -10, 10, 0.1739, 0.0001, 2.01)
 param = Upwind[3]
 t_span = [0, 0.5, 1, 2]
 snaps_KdV(Upwind, t_span, "Upwind", "0.5\ \sech(x/2)^2", param)
@@ -173,7 +190,7 @@ contour_KdV(Upwind, "Upwind", "0.5\  \sech(x/2)^2", param)
 
 
 #Initialisation ZK cos
-ZK = ZK_KdV(f_cos, 0.022, 0, 2, 0.01, 0.00001, 1.3)
+ZK = ZK_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.3)
 param = ZK[3]
 t_span = [0, 1/np.pi, 3.6/np.pi]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "cos(\pi x)", param)
@@ -182,15 +199,16 @@ contour_KdV(ZK, "Zabusky-Kruskal", "cos(\pi x)", param)
 
 
 #Initialisation ZK soliton
-ZK = ZK_KdV(f_sech, 0.022, -10, 10, 0.1739, 0.0001, 2.01)
+ZK = ZK_KdV(f_sech, -1, 2, 0.05, 0.00008, 6.01)
 param = ZK[3]
-t_span = [0, 0.5, 1, 2]
+t_span = [0, 1, 3, 5]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "0.5\ \sech(x/2)^2", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
 
 
+
 #Initialisation ZK dépassement solitons
-ZK = ZK_KdV(solit(8,15,16,5), 0.022, 0, 45, 0.5, 0.001, 13.01)
+ZK = ZK_KdV(solit(8,15,16,5), 0, 45, 0.05, 0.0001, 13.01)
 param = ZK[3]
 t_span = [0, 4, 8, 12]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "Dépassement solitons", param)
