@@ -13,13 +13,15 @@ from scipy.stats import hypsecant
 def k(alpha, beta):
     rh = np.arange(0,4*pi, 0.05)
     kap = [(1+2*alpha*(sin(x/2)**2))**2 + (sin(x)**2)*(alpha - 4*beta*(sin(x/2)**2))**2 for x in rh]
+    #kap = [1+4*(alpha**2)*(sin(x/2)**2)+4*alpha*(sin(x/2)**2)+2*alpha*beta*sin(x/2)*cos(x/2)*(sin(2*x)-2*sin(x))
+    #+(beta**2)*((sin(2*x)-2*sin(x))**2) for x in rh] #Essai avec un autre calcul de kappa
     return max(kap)
 
 al = np.arange(-1.1,0.1, 0.05)
 be = np.arange(-0.7,0.3, 0.05)
 
 kappa = [[k(a,b) for a in al] for b in be]
-"""
+
 [aa,bb]=np.meshgrid(al,be)
 levels = np.arange(0,6,0.5)
 plt.contourf(aa,bb, np.array(kappa), levels)
@@ -44,7 +46,7 @@ plt.title("Domaine sur lequel le module de $\kappa$ est inférieur à 1")
 plt.colorbar()
 plt.show()
 
-"""
+
 
 
 
@@ -65,10 +67,11 @@ def f_sech(x):
     return u_inf + (u_0-u_inf)*(pi*hypsecant.pdf((x-x_0)/Delta))**2
 
 
-"""def solit(c1,a1,c2,a2):
+def solit(c1,a1,c2,a2):
     def sol_(x):
         return 0.5*c1*(pi*hypsecant.pdf((x-a1)*sqrt(c1)/2))**2 + 0.5*c2*(pi*hypsecant.pdf((x-a2)*sqrt(c2)/2))**2
-    return sol_"""
+    return sol_
+
 
 def solit(u1,x1,u2,x2):
     Delta1 = delta/sqrt(u1/12)
@@ -90,9 +93,10 @@ def Upwind_KdV(u_0, x_L, x_R, h, k, T):
     U.append([u_0(x) for x in x_grid])
 
     w0 = max(U[0])
-    alpha = (k/h)*w0
-    beta = (delta**2)*k/(2*(h**3))
-    print("Paramètres numériques : L = {}, T = {}s, h = {:2.4f}, k = {:2.6f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
+    alpha = (k/h)*w0 #rajouter un moins ici ne change rien et nous donne quelque chose de cohérent avec notre calcul de stabilité au dessus.
+    beta = (delta**2)*k/(2*(h**3)) #dans tous les cas changer les alpha et beta ici sans toucher à delta ne change rien dans le calcul explicite du schéma puisqu'on utilise que delta.
+    #beta = (delta**2)*alpha/(h**2)*w0
+    print("Paramètres numériques : L = {}, T = {}s, h = {:2.6f}, k = {:2.6f}, delta = {:2.6f}, alpha = {:2.6f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
 
 
     for t in t_grid[1:]:
@@ -121,7 +125,7 @@ def ZK_KdV(u_0, x_L, x_R, h, k, T):
     w0 = max(U[0])
     alpha = (k/h)*w0
     beta = (delta**2)*k/(2*(h**3))
-    print("Paramètres numériques : L = {}, T = {}s, h = {:2.4f}, k = {:2.4f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
+    print("Paramètres numériques : L = {}, T = {}s, h = {:2.6f}, k = {:2.6f}, delta = {:2.6f}, alpha = {:2.6f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
 
 
     for t in t_grid[1:]:
@@ -152,7 +156,7 @@ def snaps_KdV(U, t_range, schema, CI, parametres):
     plt.ylim([MI-0.2, MA+0.2])
     plt.xlabel("$x$")
     plt.ylabel("$u(x,t)$")
-    plt.title('Instantanés de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.6f}'.format(schema, CI, *parametres))
+    plt.title('Instantanés de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.6f}, beta = {:2.6f}'.format(schema, CI, *parametres))
     plt.legend()
     plt.show()
     plt.close()
@@ -161,7 +165,7 @@ def contour_KdV(U, schema, CI, parametres):
     #Plot 2D
     [xx,tt]=np.meshgrid(U[1],U[2])
     plt.contourf(xx,tt, np.array(U[0]), levels = 30)
-    plt.title('Graphes de contour de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.6f}'.format(schema, CI, *parametres))
+    plt.title('Graphes de contour de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.6f}, beta = {:2.6f}'.format(schema, CI, *parametres))
     plt.xlabel("x")
     plt.ylabel("t")
     plt.colorbar()
@@ -175,16 +179,13 @@ t_span = [0, 1/np.pi, 3.6/np.pi]
 snaps_KdV(Upwind, t_span, "Upwind", "cos(\pi x)", param)
 contour_KdV(Upwind, "Upwind", "cos(\pi x)", param)
 
-
-"""
 #Initialisation Upwind soliton
 Upwind = Upwind_KdV(f_sech, -0.4, 0.6, 0.003, 0.00001, 1.01)
 param = Upwind[3]
 t_span = [0, 0.25, 0.5, 1]
 snaps_KdV(Upwind, t_span, "Upwind", "0.5\ \sech(x/2)^2", param)
-contour_KdV(Upwind, "Upwind", "0.5\  \sech(x/2)^2", param)
+#contour_KdV(Upwind, "Upwind", "0.5\  \sech(x/2)^2", param) fait crash mon ordi
 
-"""
 
 #Initialisation ZK cos
 ZK = ZK_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.15)
@@ -210,4 +211,3 @@ param = ZK[3]
 t_span = [0, 1.5, 3, 4.5]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "Dépassement solitons", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
-
