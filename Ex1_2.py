@@ -179,6 +179,24 @@ t_span = [0, 1/np.pi, 3.6/np.pi]
 snaps_KdV(Upwind, t_span, "Upwind", "cos(\pi x)", param)
 contour_KdV(Upwind, "Upwind", "cos(\pi x)", param)
 
+#Plot semi-animé d'Instantanés
+t_span = np.arange(0,1.5,0.1)
+n = np.zeros(np.shape(t_span)[0])
+for t in t_span:
+    n = [int(t/k)]
+    if n[0] < len(Upwind[1]):
+        plt.plot(Upwind[1], Upwind[0][n[0]], label = "$t={:2.2f}\; s$".format(t), marker ='.')
+        #plt.title('Instantanés dépassement de solitons sur base du schéma ZK.\n $L = {}, h = {}, k = {}, T = {}, \delta = {}$'.format(x_f, h, k, t_f, delta))
+        plt.xlabel('$x$')
+        plt.ylabel('Amplitude')
+        #plt.ylim([0,20])
+        plt.legend()
+        plt.show(block=False)
+        plt.pause(0.05)
+        plt.clf()
+plt.close()
+
+
 #Initialisation Upwind soliton
 Upwind = Upwind_KdV(f_sech, -0.4, 0.6, 0.003, 0.00001, 1.01)
 param = Upwind[3]
