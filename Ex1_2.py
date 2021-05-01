@@ -92,7 +92,7 @@ def Upwind_KdV(u_0, x_L, x_R, h, k, T):
     w0 = max(U[0])
     alpha = (k/h)*w0
     beta = (delta**2)*k/(2*(h**3))
-    print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.6f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
+    print("Paramètres numériques : L = {}, T = {}s, h = {:2.4f}, k = {:2.6f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
 
 
     for t in t_grid[1:]:
@@ -121,7 +121,7 @@ def ZK_KdV(u_0, x_L, x_R, h, k, T):
     w0 = max(U[0])
     alpha = (k/h)*w0
     beta = (delta**2)*k/(2*(h**3))
-    print("Paramètres numérique : L = {}, T = {}s, h = {:2.4f}, k = {:2.4f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
+    print("Paramètres numériques : L = {}, T = {}s, h = {:2.4f}, k = {:2.4f}, delta = {:2.4f}, alpha = {:2.4f}, beta= {:2.6f}".format(L, T, h, k, delta, alpha, beta))
 
 
     for t in t_grid[1:]:
@@ -160,8 +160,8 @@ def snaps_KdV(U, t_range, schema, CI, parametres):
 def contour_KdV(U, schema, CI, parametres):
     #Plot 2D
     [xx,tt]=np.meshgrid(U[1],U[2])
-    plt.contourf(xx,tt, np.array(U[0]))
-    plt.title('Meshgrid de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.6f}'.format(schema, CI, *parametres))
+    plt.contourf(xx,tt, np.array(U[0]), levels = 30)
+    plt.title('Graphes de contour de la résolution de KdV par le schéma {}, CI = ${}$ ,\n L = {}, T = {}s, h = {}, k = {}, $\delta$ = {},  alpha = {:2.4f}, beta = {:2.6f}'.format(schema, CI, *parametres))
     plt.xlabel("x")
     plt.ylabel("t")
     plt.colorbar()
@@ -176,17 +176,18 @@ snaps_KdV(Upwind, t_span, "Upwind", "cos(\pi x)", param)
 contour_KdV(Upwind, "Upwind", "cos(\pi x)", param)
 
 
-
+"""
 #Initialisation Upwind soliton
-Upwind = Upwind_KdV(f_sech, -10, 10, 0.1739, 0.0001, 2.01)
+Upwind = Upwind_KdV(f_sech, -0.4, 0.6, 0.003, 0.00001, 1.01)
 param = Upwind[3]
-t_span = [0, 0.5, 1, 2]
+t_span = [0, 0.25, 0.5, 1]
 snaps_KdV(Upwind, t_span, "Upwind", "0.5\ \sech(x/2)^2", param)
 contour_KdV(Upwind, "Upwind", "0.5\  \sech(x/2)^2", param)
 
+"""
 
 #Initialisation ZK cos
-ZK = ZK_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.3)
+ZK = ZK_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.15)
 param = ZK[3]
 t_span = [0, 1/np.pi, 3.6/np.pi]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "cos(\pi x)", param)
@@ -195,18 +196,18 @@ contour_KdV(ZK, "Zabusky-Kruskal", "cos(\pi x)", param)
 
 
 #Initialisation ZK soliton
-ZK = ZK_KdV(f_sech, -1, 1, 0.01, 0.0001, 6.01)
+ZK = ZK_KdV(f_sech, -0.4, 0.6, 0.003, 0.00001, 1.01)
 param = ZK[3]
-t_span = [0, 2, 3, 4]
+t_span = [0, 0.25, 0.5, 1]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "0.5\ \sech(x/2)^2", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
 
 
-"""
+
 #Initialisation ZK dépassement solitons
-ZK = ZK_KdV(solit(8,15,16,5), 0, 45, 0.05, 0.0001, 13.01)
+ZK = ZK_KdV(solit(0.4,0.8,0.8,0.3), 0, 2, 0.01, 0.00005, 4.51)
 param = ZK[3]
-t_span = [0, 4, 8, 12]
+t_span = [0, 1.5, 3, 4.5]
 snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "Dépassement solitons", param)
 contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
-"""
+
