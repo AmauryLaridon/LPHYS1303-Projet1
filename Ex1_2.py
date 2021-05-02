@@ -78,9 +78,11 @@ def solit(u1,x1,u2,x2):
 
 def Upwind_KdV(u_0, x_L, x_R, h, k, T):
     x_grid = np.arange(x_L, x_R - h, h)
-    print("Résolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
+    print("\n\nRésolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T-k, k)
     print("Résolution numérique avec une grille temporelle de {} points".format(len(t_grid)))
+    if len(x_grid)*len(t_grid) > 3e7 : 
+        print("\n Attention : long temps de calcul \n")
 
     L = x_R - x_L
     U = []
@@ -94,7 +96,7 @@ def Upwind_KdV(u_0, x_L, x_R, h, k, T):
 
 
     for t in t_grid[1:]:
-        u1 = [U[-1][-2], U[-1][-1], *U[-1], U[-1][0], U[-1][1]] # Conditions aux bord périodiques
+        u1 = [U[-1][-2], U[-1][-1], *U[-1], U[-1][0], U[-1][1]] # Conditions aux bords périodiques
         nex = []
         for i in range(len(U[-1])):
             if u1[i+2] >= 0 :
@@ -108,11 +110,11 @@ def Upwind_KdV(u_0, x_L, x_R, h, k, T):
 
 def ZK_KdV(u_0, x_L, x_R, h, k, T):
     x_grid = np.arange(x_L, x_R - h, h)
-    print("Résolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
+    print("\n\nRésolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T-k, k)
     print("Résolution numérique avec une grille temporelle de {} points".format(len(t_grid)))
-    if len(x_grid)*len(t_grid) > 2e5 : 
-        print("\n Attention : long temps de calcul \n")
+    if len(x_grid)*len(t_grid) > 3e7 : 
+        print("\n    Attention : long temps de calcul \n")
 
     L = x_R - x_L
     U = []
@@ -172,8 +174,8 @@ def contour_KdV(U, schema, CI, parametres):
 Upwind = Upwind_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.3)
 param = Upwind[3]
 t_span = [0, 1/np.pi, 3.6/np.pi]
-snaps_KdV(Upwind, t_span, "Upwind", "cos(\pi x)", param)
-contour_KdV(Upwind, "Upwind", "cos(\pi x)", param)
+snaps_KdV(Upwind, t_span, "Upwind", "\cos(\pi x)", param)
+contour_KdV(Upwind, "Upwind", "\cos(\pi x)", param)
 
 #Plot semi-animé d'Instantanés
 t_span = np.arange(0,1.5,0.1)
@@ -194,19 +196,19 @@ plt.close()
 
 
 #Initialisation Upwind soliton
-Upwind = Upwind_KdV(f_sech, -0.4, 0.6, 0.01, 0.00001, 1.01)
+Upwind = Upwind_KdV(f_sech, -0.4, 0.6, 0.008, 0.000008, 1.01)
 param = Upwind[3]
 t_span = [0, 0.25, 0.5, 1]
-snaps_KdV(Upwind, t_span, "Upwind", "0.5\ \sech(x/2)^2", param)
-contour_KdV(Upwind, "Upwind", "0.5\  \sech(x/2)^2", param) #fait crash mon ordi
+snaps_KdV(Upwind, t_span, "Upwind", "\operatorname{sech}(x)^2", param)
+contour_KdV(Upwind, "Upwind", "\operatorname{sech}(x)^2", param) #fait crash mon ordi
 
 
 #Initialisation ZK cos
-ZK = ZK_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.15)
+ZK = ZK_KdV(f_cos, 0, 2, 0.008, 0.000008, 1.15)
 param = ZK[3]
 t_span = [0, 1/np.pi, 3.6/np.pi]
-snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "cos(\pi x)", param)
-contour_KdV(ZK, "Zabusky-Kruskal", "cos(\pi x)", param)
+snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "\cos(\pi x)", param)
+contour_KdV(ZK, "Zabusky-Kruskal", "\cos(\pi x)", param)
 
 
 
