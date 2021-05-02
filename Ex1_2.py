@@ -67,12 +67,6 @@ def f_sech(x):
     return u_inf + (u_0-u_inf)*(pi*hypsecant.pdf((x-x_0)/Delta))**2
 
 
-def solit(c1,a1,c2,a2):
-    def sol_(x):
-        return 0.5*c1*(pi*hypsecant.pdf((x-a1)*sqrt(c1)/2))**2 + 0.5*c2*(pi*hypsecant.pdf((x-a2)*sqrt(c2)/2))**2
-    return sol_
-
-
 def solit(u1,x1,u2,x2):
     Delta1 = delta/sqrt(u1/12)
     Delta2 = delta/sqrt(u2/12)
@@ -117,6 +111,8 @@ def ZK_KdV(u_0, x_L, x_R, h, k, T):
     print("Résolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T-k, k)
     print("Résolution numérique avec une grille temporelle de {} points".format(len(t_grid)))
+    if len(x_grid)*len(t_grid) > 2e5 : 
+        print("\n Attention : long temps de calcul \n")
 
     L = x_R - x_L
     U = []
@@ -198,11 +194,11 @@ plt.close()
 
 
 #Initialisation Upwind soliton
-Upwind = Upwind_KdV(f_sech, -0.4, 0.6, 0.003, 0.00001, 1.01)
+Upwind = Upwind_KdV(f_sech, -0.4, 0.6, 0.01, 0.00001, 1.01)
 param = Upwind[3]
 t_span = [0, 0.25, 0.5, 1]
 snaps_KdV(Upwind, t_span, "Upwind", "0.5\ \sech(x/2)^2", param)
-#contour_KdV(Upwind, "Upwind", "0.5\  \sech(x/2)^2", param) fait crash mon ordi
+contour_KdV(Upwind, "Upwind", "0.5\  \sech(x/2)^2", param) #fait crash mon ordi
 
 
 #Initialisation ZK cos
@@ -218,14 +214,14 @@ contour_KdV(ZK, "Zabusky-Kruskal", "cos(\pi x)", param)
 ZK = ZK_KdV(f_sech, -0.4, 0.6, 0.003, 0.00001, 1.01)
 param = ZK[3]
 t_span = [0, 0.25, 0.5, 1]
-snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "0.5\ \sech(x/2)^2", param)
-contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
+snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "\operatorname{sech}(x)^2", param)
+contour_KdV(ZK, "Zabusky-Kruskal", "\operatorname{sech}(x)^2", param)
 
 
 
 #Initialisation ZK dépassement solitons
-ZK = ZK_KdV(solit(0.4,0.8,0.8,0.3), 0, 2, 0.01, 0.00005, 4.51)
+ZK = ZK_KdV(solit(0.4,0.8,0.8,0.3), 0, 2, 0.005, 0.00005, 4.51)
 param = ZK[3]
 t_span = [0, 1.5, 3, 4.5]
-snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "Dépassement solitons", param)
-contour_KdV(ZK, "Zabusky-Kruskal", "0.5\  \sech(x/2)^2", param)
+snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "\operatorname{sech}(x-a)^2 + \operatorname{sech}(x-b)^2", param)
+contour_KdV(ZK, "Zabusky-Kruskal", "\operatorname{sech}(x-a)^2 + \operatorname{sech}(x-b)^2", param)
