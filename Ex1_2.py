@@ -77,9 +77,9 @@ def solit(u1,x1,u2,x2):
 
 
 def Upwind_KdV(u_0, x_L, x_R, h, k, T):
-    x_grid = np.arange(x_L, x_R - h, h)
+    x_grid = np.arange(x_L, x_R, h)
     print("\n\nRésolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
-    t_grid = np.arange(0, T-k, k)
+    t_grid = np.arange(0, T, k)
     print("Résolution numérique avec une grille temporelle de {} points".format(len(t_grid)))
     if len(x_grid)*len(t_grid) > 3e7 : 
         print("\n Attention : long temps de calcul \n")
@@ -109,9 +109,9 @@ def Upwind_KdV(u_0, x_L, x_R, h, k, T):
 
 
 def ZK_KdV(u_0, x_L, x_R, h, k, T):
-    x_grid = np.arange(x_L, x_R - h, h)
+    x_grid = np.arange(x_L, x_R, h)
     print("\n\nRésolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
-    t_grid = np.arange(0, T-k, k)
+    t_grid = np.arange(0, T, k)
     print("Résolution numérique avec une grille temporelle de {} points".format(len(t_grid)))
     if len(x_grid)*len(t_grid) > 3e7 : 
         print("\n    Attention : long temps de calcul \n")
