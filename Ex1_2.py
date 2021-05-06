@@ -94,6 +94,7 @@ def ZK_KdV(u_0, x_L, x_R, h, k, T):
     print("\n\nRésolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T, k)
     print("Résolution numérique avec une grille temporelle de {} points".format(len(t_grid)))
+    print("Temps de calcul approximatif : {} s".format(len(x_grid)*len(t_grid)*2.7161e-6))
     if len(x_grid)*len(t_grid) > 3e7 :
         print("\n    Attention : long temps de calcul \n")
 
