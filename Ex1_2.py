@@ -10,28 +10,14 @@ from scipy.stats import hypsecant
 
 
 ################################### Norme |kappa|^2###############################
-"""def k(alpha, beta):
-    rh = np.arange(0,4*pi, 0.05)
-    kap = [(1+2*alpha*(sin(x/2)**2))**2 + (sin(x)**2)*(alpha - 4*beta*(sin(x/2)**2))**2 for x in rh]
-    #kap = [1+4*(alpha**2)*(sin(x/2)**2)+4*alpha*(sin(x/2)**2)+2*alpha*beta*sin(x/2)*cos(x/2)*(sin(2*x)-2*sin(x))
-    #+(beta**2)*((sin(2*x)-2*sin(x))**2) for x in rh] #Essai avec un autre calcul de kappa
-    return max(kap)
-"""
+
 def k(alpha, beta):
-    rh = np.arange(0,4*pi, 0.02)
-    #kap = 1-2*1j*alpha*np.exp(1j*rh/2)*np.sin(rh/2)-1j*beta*(np.sin(2*rh)-2*np.sin(rh)) #c'est notre équation 2.16
-    #kap = 1-alpha*(1-np.cos(rh)+1j*np.sin(rh))-beta*(4*1j*np.sin(rh)*(np.cos(rh)-1)) #Le kap de l'article équation 4.7
+    rh = np.arange(0,4*pi, 0.005)
     kap = 1-alpha*(1-np.exp(-1j*rh))-beta*(np.exp(2*rh*1j)-2*np.exp(rh*1j)+2*np.exp(-rh*1j)-np.exp(-2*rh*1j))
-    #print(kap)
     mod_kap_squared = np.abs(kap)**2
-    #mod_squared_kap = mod_kap**2
-    #print(np.shape(mod_kap_squared))
-    #print(mod_kap_squared)
-    #kap = [1+4*(alpha**2)*(sin(x/2)**2)+4*alpha*(sin(x/2)**2)+2*alpha*beta*sin(x/2)*cos(x/2)*(sin(2*x)-2*sin(x))
-    #+(beta**2)*((sin(2*x)-2*sin(x))**2) for x in rh] #Essai avec un autre calcul de kappa
     return max(mod_kap_squared)
-al = np.arange(-1.1,1.1, 0.05)
-be = np.arange(-1.7,1.3, 0.05)
+al = np.arange(-0.25,1.1, 0.005)
+be = np.arange(-0.25,0.5, 0.005)
 
 kappa = [[k(a,b) for a in al] for b in be]
 
