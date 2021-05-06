@@ -4,13 +4,7 @@ import numpy as np
 from numpy import sqrt, pi ,exp, cos, sin, sqrt
 from scipy.stats import hypsecant
 
-
-
-
-
-
 ################################### Norme |kappa|^2###############################
-
 def k(alpha, beta):
     rh = np.arange(0,4*pi, 0.005)
     kap = 1-alpha*(1-np.exp(-1j*rh))-beta*(np.exp(2*rh*1j)-2*np.exp(rh*1j)+2*np.exp(-rh*1j)-np.exp(-2*rh*1j))
@@ -19,40 +13,36 @@ def k(alpha, beta):
 al = np.arange(-0.25,1.1, 0.005)
 be = np.arange(-0.25,0.5, 0.005)
 
-kappa = [[k(a,b) for a in al] for b in be]
+if __name__ == "__main__":
+    kappa = [[k(a,b) for a in al] for b in be]
 
-[aa,bb]=np.meshgrid(al,be)
-levels = np.arange(0,6,0.5)
-plt.contourf(aa,bb, np.array(kappa), levels)
-plt.xlabel("$α$")
-plt.ylabel("$β$")
-plt.title("Module carré du facteur d'amplification $\kappa$ en fonction des paramètres numériques")
-plt.colorbar()
-plt.show()
+    [aa,bb]=np.meshgrid(al,be)
+    levels = np.arange(0,6,0.5)
+    plt.contourf(aa,bb, np.array(kappa), levels)
+    plt.xlabel("$α$")
+    plt.ylabel("$β$")
+    plt.title("Module carré du facteur d'amplification $\kappa$ en fonction des paramètres numériques")
+    plt.colorbar()
+    plt.show()
 
-for i,ka in enumerate(kappa) :
-    for j,k in enumerate(ka):
-        if k > 1:
-            kappa[i][j] = 1000
-        else:
-            kappa[i][j] = 0
+    for i,ka in enumerate(kappa) :
+        for j,k in enumerate(ka):
+            if k > 1:
+                kappa[i][j] = 1000
+            else:
+                kappa[i][j] = 0
 
-levels = [0,1,1001]
-plt.contourf(aa,bb, np.array(kappa), levels)
-plt.xlabel("$α$")
-plt.ylabel("$β$")
-plt.title("Domaine sur lequel le module de $\kappa$ est inférieur à 1")
-plt.colorbar()
-plt.show()
-
-
-
-"""
-
+    levels = [0,1,1001]
+    plt.contourf(aa,bb, np.array(kappa), levels)
+    plt.xlabel("$α$")
+    plt.ylabel("$β$")
+    plt.title("Domaine sur lequel le module de $\kappa$ est inférieur à 1")
+    plt.colorbar()
+    plt.show()
 
 ################################### Exercice 1 Schéma Upwind ###############################
-delta = 0.022
 
+delta = 0.022
 
 def f_cos(x):
     #fonction initiale de cos
@@ -65,17 +55,8 @@ def f_sech(x):
     Delta = delta/sqrt((u_0-u_inf)/12)
     return u_inf + (u_0-u_inf)*(pi*hypsecant.pdf((x-x_0)/Delta))**2
 
-
-def solit(u1,x1,u2,x2):
-    Delta1 = delta/sqrt(u1/12)
-    Delta2 = delta/sqrt(u2/12)
-    def sol_(x):
-        return u1*(pi*hypsecant.pdf((x-x1)/Delta1))**2 + u2*(pi*hypsecant.pdf((x-x2)/Delta2))**2
-    return sol_
-
-
-
 def Upwind_KdV(u_0, x_L, x_R, h, k, T):
+    delta = 0.022
     x_grid = np.arange(x_L, x_R, h)
     print("\n\nRésolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T, k)
@@ -108,6 +89,7 @@ def Upwind_KdV(u_0, x_L, x_R, h, k, T):
 
 
 def ZK_KdV(u_0, x_L, x_R, h, k, T):
+    delta = 0.022
     x_grid = np.arange(x_L, x_R, h)
     print("\n\nRésolution numérique avec une grille spatiale de {} points".format(len(x_grid)))
     t_grid = np.arange(0, T, k)
@@ -168,62 +150,49 @@ def contour_KdV(U, schema, CI, parametres):
     plt.colorbar()
     plt.show()
 
+if __name__ == "__main__":
+    #Initialisation Upwind cos
+    Upwind = Upwind_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.3)
+    param = Upwind[3]
+    t_span = [0, 1/np.pi, 3.6/np.pi]
+    snaps_KdV(Upwind, t_span, "Upwind", "\cos(\pi x)", param)
+    contour_KdV(Upwind, "Upwind", "\cos(\pi x)", param)
 
-#Initialisation Upwind cos
-Upwind = Upwind_KdV(f_cos, 0, 2, 0.01, 0.00001, 1.3)
-param = Upwind[3]
-t_span = [0, 1/np.pi, 3.6/np.pi]
-snaps_KdV(Upwind, t_span, "Upwind", "\cos(\pi x)", param)
-contour_KdV(Upwind, "Upwind", "\cos(\pi x)", param)
+    #Plot semi-animé d'Instantanés
+    t_span = np.arange(0,1.5,0.1)
+    n = np.zeros(np.shape(t_span)[0])
+    for t in t_span:
+        n = [int(t/k)]
+        if n[0] < len(Upwind[1]):
+            plt.plot(Upwind[1], Upwind[0][n[0]], label = "$t={:2.2f}\; s$".format(t), marker ='.')
+            #plt.title('Instantanés dépassement de solitons sur base du schéma ZK.\n $L = {}, h = {}, k = {}, T = {}, \delta = {}$'.format(x_f, h, k, t_f, delta))
+            plt.xlabel('$x$')
+            plt.ylabel('Amplitude')
+            #plt.ylim([0,20])
+            plt.legend()
+            plt.show(block=False)
+            plt.pause(0.05)
+            plt.clf()
+    plt.close()
 
-#Plot semi-animé d'Instantanés
-t_span = np.arange(0,1.5,0.1)
-n = np.zeros(np.shape(t_span)[0])
-for t in t_span:
-    n = [int(t/k)]
-    if n[0] < len(Upwind[1]):
-        plt.plot(Upwind[1], Upwind[0][n[0]], label = "$t={:2.2f}\; s$".format(t), marker ='.')
-        #plt.title('Instantanés dépassement de solitons sur base du schéma ZK.\n $L = {}, h = {}, k = {}, T = {}, \delta = {}$'.format(x_f, h, k, t_f, delta))
-        plt.xlabel('$x$')
-        plt.ylabel('Amplitude')
-        #plt.ylim([0,20])
-        plt.legend()
-        plt.show(block=False)
-        plt.pause(0.05)
-        plt.clf()
-plt.close()
-
-
-#Initialisation Upwind soliton
-Upwind = Upwind_KdV(f_sech, -0.4, 0.6, 0.008, 0.000008, 1.01)
-param = Upwind[3]
-t_span = [0, 0.25, 0.5, 1]
-snaps_KdV(Upwind, t_span, "Upwind", "\operatorname{sech}(x)^2", param)
-contour_KdV(Upwind, "Upwind", "\operatorname{sech}(x)^2", param) #fait crash mon ordi
-
-
-#Initialisation ZK cos
-ZK = ZK_KdV(f_cos, 0, 2, 0.008, 0.000008, 1.15)
-param = ZK[3]
-t_span = [0, 1/np.pi, 3.6/np.pi]
-snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "\cos(\pi x)", param)
-contour_KdV(ZK, "Zabusky-Kruskal", "\cos(\pi x)", param)
+    #Initialisation Upwind soliton
+    Upwind = Upwind_KdV(f_sech, -0.4, 0.6, 0.008, 0.000008, 1.01)
+    param = Upwind[3]
+    t_span = [0, 0.25, 0.5, 1]
+    snaps_KdV(Upwind, t_span, "Upwind", "\operatorname{sech}(x)^2", param)
+    contour_KdV(Upwind, "Upwind", "\operatorname{sech}(x)^2", param) #fait crash mon ordi
 
 
+    #Initialisation ZK cos
+    ZK = ZK_KdV(f_cos, 0, 2, 0.008, 0.000008, 1.15)
+    param = ZK[3]
+    t_span = [0, 1/np.pi, 3.6/np.pi]
+    snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "\cos(\pi x)", param)
+    contour_KdV(ZK, "Zabusky-Kruskal", "\cos(\pi x)", param)
 
-#Initialisation ZK soliton
-ZK = ZK_KdV(f_sech, -0.4, 0.6, 0.003, 0.00001, 1.01)
-param = ZK[3]
-t_span = [0, 0.25, 0.5, 1]
-snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "\operatorname{sech}(x)^2", param)
-contour_KdV(ZK, "Zabusky-Kruskal", "\operatorname{sech}(x)^2", param)
-
-
-
-#Initialisation ZK dépassement solitons
-ZK = ZK_KdV(solit(0.4,0.8,0.8,0.3), 0, 2, 0.005, 0.00005, 4.51)
-param = ZK[3]
-t_span = [0, 1.5, 3, 4.5]
-snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "\operatorname{sech}(x-a)^2 + \operatorname{sech}(x-b)^2", param)
-contour_KdV(ZK, "Zabusky-Kruskal", "\operatorname{sech}(x-a)^2 + \operatorname{sech}(x-b)^2", param)
-"""
+    #Initialisation ZK soliton
+    ZK = ZK_KdV(f_sech, -0.4, 0.6, 0.003, 0.00001, 1.01)
+    param = ZK[3]
+    t_span = [0, 0.25, 0.5, 1]
+    snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "\operatorname{sech}(x)^2", param)
+    contour_KdV(ZK, "Zabusky-Kruskal", "\operatorname{sech}(x)^2", param)
