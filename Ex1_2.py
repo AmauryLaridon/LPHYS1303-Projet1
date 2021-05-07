@@ -10,8 +10,8 @@ def k(alpha, beta):
     kap = 1-alpha*(1-np.exp(-1j*rh))-beta*(np.exp(2*rh*1j)-2*np.exp(rh*1j)+2*np.exp(-rh*1j)-np.exp(-2*rh*1j))
     mod_kap_squared = np.abs(kap)**2
     return max(mod_kap_squared)
-al = np.arange(-0.25,1.1, 0.005)
-be = np.arange(-0.25,0.5, 0.005)
+al = np.arange(-0.25,1.1, 0.002)
+be = np.arange(-0.25,0.5, 0.002)
 
 if __name__ == "__main__":
     kappa = [[k(a,b) for a in al] for b in be]
