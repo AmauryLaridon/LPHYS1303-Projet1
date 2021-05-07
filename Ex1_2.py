@@ -39,7 +39,7 @@ if __name__ == "__main__":
     plt.title("Domaine sur lequel le module carré de $\kappa$ est inférieur à 1")
     plt.colorbar()
     plt.show()
-"""
+
 ################################### Exercice 1 Schéma Upwind ###############################
 
 delta = 0.022
@@ -197,4 +197,3 @@ if __name__ == "__main__":
     t_span = [0, 0.25, 0.5, 1]
     snaps_KdV(ZK, t_span, "Zabusky-Kruskal", "\operatorname{sech}(x)^2", param)
     contour_KdV(ZK, "Zabusky-Kruskal", "\operatorname{sech}(x)^2", param)
-"""
